@@ -35,7 +35,7 @@ The code relies on external NUFFT Python libraries, both implementing the NUFFT 
 
 Install the packages using the command below:
 ``` bash
-   pip install -r requirement.txt
+   pip install -r requirements.txt
 ```
 ## Examples
 
