@@ -1,6 +1,7 @@
 import argparse
 import torch
 import os
+import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
@@ -10,25 +11,32 @@ from example_sim_measop import gen_measop
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Read uv and imweight files')
-    parser.add_argument('--data_file', type=str, required=True,
-                        help='Path to the file containing u, v and imweight')
-    parser.add_argument('--gdth_file', type=str, required=True,
-                        help='Path to the file containing the ground truth image')
-    parser.add_argument('--superresolution', type=float, default=1.,
-                    help='Super resolution factor')
-    parser.add_argument('--nufft', choices=['pynufft', 'tkbn'], required=True,
-                        help='Nufft library to be used')
-    parser.add_argument('--noise_heuristic', type=float, default=None,
-                        help='Target dynamic range of the ground truth image')
-    parser.add_argument('--noise_isnr', type=float, default=None,
-                        help='Input signa-to-noise ratio')
-    parser.add_argument('--on_gpu', action='store_true',
-                        help='Utilise GPU')
-    parser.add_argument('--dict_save_foldername', type=str, default='results',
-                        help='Path to save the dictionary containing data')
+    parser.add_argument('--yaml_file', type=str, default='./configs/sim_ri_data.yaml',
+                        help='Path to the yaml file containing the arguments')
+    # parser.add_argument('--data_file', type=str, required=True,
+    #                     help='Path to the file containing u, v and imweight')
+    # parser.add_argument('--gdth_file', type=str, required=True,
+    #                     help='Path to the file containing the ground truth image')
+    # parser.add_argument('--superresolution', type=float, default=1.,
+    #                 help='Super resolution factor')
+    # parser.add_argument('--nufft', choices=['pynufft', 'tkbn'], required=True,
+    #                     help='Nufft library to be used')
+    # parser.add_argument('--noise_heuristic', type=float, default=None,
+    #                     help='Target dynamic range of the ground truth image')
+    # parser.add_argument('--noise_isnr', type=float, default=None,
+    #                     help='Input signa-to-noise ratio')
+    # parser.add_argument('--on_gpu', action='store_true',
+    #                     help='Utilise GPU')
+    # parser.add_argument('--dict_save_foldername', type=str, default='results',
+    #                     help='Path to save the dictionary containing data')
     return parser.parse_args()
 
 def main(args):
+    with open(args.yaml_file, 'r') as file:
+        args.__dict__.update(yaml.load(file, Loader=yaml.FullLoader))
+    assert args.noise_heuristic is not None or args.noise_isnr is not None, 'Please provide noise heuristic or input SNR'
+    if args.noise_heuristic is not None and args.noise_isnr is not None:
+        print('Both noise heuristic and input SNR are provided. Using noise heuristic.')
     args.device = torch.device('cuda') if args.on_gpu and torch.cuda.is_available() else torch.device('cpu')
     args.dict_save_path = os.path.join(os.getcwd(), args.dict_save_foldername)
     if not os.path.exists(args.dict_save_path):
@@ -115,7 +123,4 @@ def main(args):
     
 if __name__ == '__main__':
     args = parse_args()
-    assert args.noise_heuristic is not None or args.noise_isnr is not None, 'Please provide noise heuristic or input SNR'
-    if args.noise_heuristic is not None and args.noise_isnr is not None:
-        print('Both noise heuristic and input SNR are provided. Using noise heuristic.')
     main(args)
