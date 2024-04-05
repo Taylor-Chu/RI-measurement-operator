@@ -21,8 +21,10 @@ def parse_args():
     return parser.parse_args()
 
 def gen_measop(args):
+    args.im_size = tuple(args.im_size)
+    args.device = torch.device('cuda') if args.on_gpu and torch.cuda.is_available() else torch.device('cpu')
     # read Fourier sampling pattern from specified data file 
-    uv, nWimag = read_uv(args.data_file, args.superresolution, f'{args.dict_save_path}/{args.fname}_data.mat', args.device, args.nufft)
+    uv, nWimag, data_dict = read_uv(args.data_file, args.superresolution, args.device, args.nufft)
     # create measurement operator object based on the chosen nufft library
     match args.nufft:
         case 'tkbn':
@@ -32,9 +34,8 @@ def gen_measop(args):
         
     # set the Fourier sampling pattern in the measurement operator
     measop.set_uv_imweight(uv, None)
-    return measop, nWimag
+    return measop, nWimag, data_dict
 
 if __name__ == '__main__':
     args = parse_args()
-    args.device = torch.device('cuda') if args.on_gpu and torch.cuda.is_available() else torch.device('cpu')
-    measop = gen_measop(args)
+    measop, _, _ = gen_measop(args)
