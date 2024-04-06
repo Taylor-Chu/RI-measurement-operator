@@ -22,7 +22,7 @@ Clone the current repository
 git clone -b python  https://github.com/basp-group/RI-measurement-operator.git
 ```
 
-## Dependencies
+## Dependencies 
 
 The code relies on external NUFFT Python libraries, both implementing the NUFFT proposed by
 
@@ -37,6 +37,30 @@ Install the packages using the command below:
 ``` bash
    pip install -r requirements.txt
 ```
+
+## Dependencies (Conda)
+
+```
+conda env create -f dependencies.yml 
+```
+If the conda command is not recognized, read [CONDA_INSTALL.md](CONDA_INSTALL.md).
+
+To activate this environment, use
+```
+conda activate duprez-env / source activate duprez-env
+```
+To deactivate an active environment, use
+```
+conda deactivate / source deactivate
+```
+where ``source`` might be needed for recent versions of conda.
+
+---
+If you want another environment name, write
+```
+conda env create -f dependencies.yml --name <your_env_name>
+```
+
 ## Examples
 
 Two examples of usage are provided: 
