@@ -47,7 +47,7 @@ If the conda command is not recognized, read [CONDA_INSTALL.md](CONDA_INSTALL.md
 
 To activate this environment, use
 ```
-conda activate duprez-env / source activate duprez-env
+conda activate RI-meas-op / source activate RI-meas-op
 ```
 To deactivate an active environment, use
 ```
