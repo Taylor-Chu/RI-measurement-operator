@@ -76,9 +76,9 @@ function [u_ab, v_ab, w_ab, na, antennas] = generate_uv_coverage_ROP(T, hrs, cov
         end
     end
     % the matrices are hermitian
-    u_ab = u_ab + conj(permute(u_ab, [1, 3, 2]));
-    v_ab = v_ab + conj(permute(v_ab, [1, 3, 2]));
-    w_ab = w_ab + conj(permute(w_ab, [1, 3, 2]));
+    u_ab = u_ab - permute(u_ab, [1, 3, 2]);
+    v_ab = v_ab - permute(v_ab, [1, 3, 2]);
+    w_ab = w_ab - permute(w_ab, [1, 3, 2]);
     
     % vectorize
     u_ab = u_ab(:);
