@@ -17,6 +17,12 @@ function X = so_fft2(x, No, scale)
 %     2D FFT coefficients.
 %
 
+% if x is 1D, reshape to square image 
+if size(x, 2) == 1
+    N = sqrt(numel(x));
+    x = reshape(x, [N, N]);
+end
+
 %%
 % apply scaling factors
 x = x .* scale;
