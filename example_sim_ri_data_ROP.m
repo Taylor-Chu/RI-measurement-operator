@@ -7,6 +7,7 @@ fprintf("*** Simulate toy radio data from a built-in astronomical image ***\n")
 addpath data;
 addpath nufft;
 addpath lib/operators;
+addpath lib/operators/ROP/;
 addpath lib/utils;
 addpath lib/ddes_utils;
 
