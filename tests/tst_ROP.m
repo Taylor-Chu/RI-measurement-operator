@@ -1,8 +1,5 @@
-% disp current path
-disp(pwd);
-
-% add the ../utils/util_ROP folder to the path
-addpath('../lib/utils/util_ROP');
+% setup path
+addpath('../lib/operators/ROP');
 
 m = 5;
 n = 3;
