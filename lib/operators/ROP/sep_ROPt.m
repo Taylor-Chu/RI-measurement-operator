@@ -19,9 +19,9 @@ function [z] = sep_ROPt(A,y,B)
         error('Dimension mismatch between y and A');
     end
 
-    z = zeros(n^2,b);
+    z = zeros(b,n^2);
     for i=1:b 
-        z(:,i) = ROPt(A(:,:,i),y(:,i),B(:,:,i));
+        z(i,:) = ROPt(A(:,:,i),y(:,i),B(:,:,i));
     end
     z = z(:);
 
