@@ -19,7 +19,7 @@ superresolution = 1.5; % ratio between imaged Fourier bandwidth and sampling ban
 % antenna configuration
 telescope = 'vlaa';
 % total number of snapshots
-nTimeSamples = 100;
+nTimeSamples = 100; 
 % obs duration in hours
 obsTime = 4;
 % obs. frequency in MHz
@@ -55,6 +55,8 @@ end
 fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
 [umeter, vmeter, wmeter, na] = generate_uv_coverage_ROP(nTimeSamples, obsTime, telescope);
 
+% figure(); plot(umeter, vmeter, 'o'); title('uv-coverage'); axis equal; grid on;
+
 % convert uvw in units of the wavelength
 speedOfLight = 299792458;
 u = umeter ./ (speedOfLight/frequency) ;
@@ -69,11 +71,23 @@ fprintf("\nbuild NUFFT measurement operator .. ")
 resolution_param.superresolution = superresolution; 
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
-% ROP parameters
+% generate the random realizations.
+Npb = 2500;
+rvtype = 'unitary'; % 'gaussian
+
+if strcmp(ROP_param.rvtype,'gaussian')
+    alpha = (randn(na,Npb,nTimeSamples)+1i*randn(na,Npb,nTimeSamples))/sqrt(2);
+    beta = (randn(na,Npb,nTimeSamples)+1i*randn(na,Npb,nTimeSamples))/sqrt(2);
+elseif strcmp(ROP_param.rvtype,'unitary')
+    alpha = exp(1i*2*pi*rand(na,Npb,nTimeSamples));
+    beta = exp(1i*2*pi*rand(na,Npb,nTimeSamples));
+else
+    error('Unknown random variable type.');
+end
+
 ROP_param = struct();
-ROP_param.Na = na;
-ROP_param.Npb = 200;
-ROP_param.B = nTimeSamples;
+ROP_param.alpha = alpha;
+ROP_param.beta = beta;
 
 % measurement operator
 [measop, adjoint_measop] = ops_raw_measop_ROP(u,v,w, imSize, resolution_param, ROP_param);
@@ -84,6 +98,13 @@ vis = measop(gdthim);
 
 %number of data points
 nmeas = numel(vis);
+
+measop_shape = struct();
+measop_shape.in = [prod(imSize), 1];
+measop_shape.out = [nmeas, 1];
+adjoint_test(measop, adjoint_measop, measop_shape);
+
+% figure(); hist(imag(vis), 100); title('Visibility amplitudes');
 
 %% model data
 
@@ -131,15 +152,18 @@ end
 
 % data
 fprintf("\nsimulate data  .. ")
-y = vis + noise;
+% y = vis + noise;
+y = vis;
 
 %% back-projected data
 fprintf("\nget (non-normalised) back-projected data  .. ")
 if weighting_on
     dirty = real( adjoint_measop((nWimag.^2).*y) );
+    dirty = reshape(dirty, imSize);
     figure(2), imagesc(dirty), colorbar, title ('dirty image (weights applied)'), axis image,   axis off,
 else
     dirty = real( adjoint_measop(y) );
+    dirty = reshape(dirty, imSize);
     figure(2), imagesc(dirty), colorbar, title ('dirty image'), axis image,   axis off,
 end
 
@@ -147,12 +171,13 @@ end
 % whitening vector
 fprintf("\nsave data file  .. ")
 mkdir 'results'
-matfilename = "results/ngc6543a_data.mat" ;
-dirtyfilename = "results/ngc6543a_dirty.fits" ; 
+matfilename = "results/ngc6543a_data_ROP_unit.mat" ;
+dirtyfilename = "results/ngc6543a_dirty_ROP_unit.fits" ; 
+gtfilename = "results/ngc6543a_gt.fits" ;
 
 % save mat file
 nW = tau *ones(nmeas,1);
-save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency",'-v7.3')
+save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "alpha", "beta", '-v7.3')
 % add imaging weights
 if weighting_on
     save(matfilename,"nWimag",'-append')
@@ -160,6 +185,9 @@ end
 
 % save (non-normalised) dirty image
 fitswrite(dirty, dirtyfilename)
+
+% save ground truth image
+fitswrite(gdthim, gtfilename)
 
 
 fprintf('\nDone.')
