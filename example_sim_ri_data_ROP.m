@@ -75,10 +75,10 @@ resolution_param.superresolution = superresolution;
 Npb = 2500;
 rvtype = 'unitary'; % 'gaussian
 
-if strcmp(ROP_param.rvtype,'gaussian')
+if strcmp(rvtype,'gaussian')
     alpha = (randn(na,Npb,nTimeSamples)+1i*randn(na,Npb,nTimeSamples))/sqrt(2);
     beta = (randn(na,Npb,nTimeSamples)+1i*randn(na,Npb,nTimeSamples))/sqrt(2);
-elseif strcmp(ROP_param.rvtype,'unitary')
+elseif strcmp(rvtype,'unitary')
     alpha = exp(1i*2*pi*rand(na,Npb,nTimeSamples));
     beta = exp(1i*2*pi*rand(na,Npb,nTimeSamples));
 else
