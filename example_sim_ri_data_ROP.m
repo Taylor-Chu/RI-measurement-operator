@@ -72,7 +72,7 @@ resolution_param.superresolution = superresolution;
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
 % generate the random realizations.
-Npb = 2500;
+Npb = 500;
 rvtype = 'unitary'; % 'gaussian
 
 if strcmp(rvtype,'gaussian')
@@ -171,12 +171,12 @@ end
 % whitening vector
 fprintf("\nsave data file  .. ")
 mkdir 'results'
-matfilename = "results/ngc6543a_data_ROP_unit.mat" ;
-dirtyfilename = "results/ngc6543a_dirty_ROP_unit.fits" ; 
+matfilename = "results/ngc6543a_data_ROP_unit500.mat" ;
+dirtyfilename = "results/ngc6543a_dirty_ROP_unit500.fits" ; 
 gtfilename = "results/ngc6543a_gt.fits" ;
 
 % save mat file
-nW = tau *ones(nmeas,1);
+nW = tau * ones(na^2*nTimeSamples,1);
 save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "alpha", "beta", '-v7.3')
 % add imaging weights
 if weighting_on

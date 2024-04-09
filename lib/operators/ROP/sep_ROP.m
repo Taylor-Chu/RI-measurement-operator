@@ -12,11 +12,6 @@ function [y] = sep_ROP(A,X,B)
     % reshape X to a matrix
     X = reshape(X, [b, n^2]);
 
-    % % verify that the first term is hermitian when reshaped
-    % % tmp = reshape(X(:,1), [n,n]);
-    % figure(); imagesc(real(squeeze(X(1,:,:)))); colorbar; hold on;
-    % assert(norm(tmp - tmp') < 1e-10, 'X is not hermitian')
-
     % verify compatibility of dimensions
     if size(X,1) ~= b || size(X,2) ~= n^2
         error('Dimension mismatch between A and X');
