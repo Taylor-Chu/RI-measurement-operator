@@ -72,7 +72,7 @@ resolution_param.superresolution = superresolution;
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
 % generate the random realizations.
-Npb = 500;
+Npb = 100;
 rvtype = 'unitary'; % 'gaussian
 
 if strcmp(rvtype,'gaussian')
@@ -94,17 +94,20 @@ ROP_param.beta = beta;
  
 %% model clean visibilities 
 fprintf("\nsimulate model visibilities .. ")
-vis = measop(gdthim);
+meas = measop(gdthim);
 
 %number of data points
-nmeas = numel(vis);
+nmeas = numel(meas);
 
-measop_shape = struct();
-measop_shape.in = [prod(imSize), 1];
-measop_shape.out = [nmeas, 1];
-adjoint_test(measop, adjoint_measop, measop_shape);
+% figure(); hist(imag(meas), 100); title('Measurement amplitudes');
 
-% figure(); hist(imag(vis), 100); title('Visibility amplitudes');
+% %% Adjoint test
+% measop_vec = @(x) measop(reshape(x, imSize));
+% adjoint_measop_vec = @(x) reshape(adjoint_measop(x), [], 1);
+% measop_shape = struct();
+% measop_shape.in = [prod(imSize), 1];
+% measop_shape.out = [nmeas, 1];
+% adjoint_test(measop_vec, adjoint_measop_vec, measop_shape);
 
 %% model data
 
@@ -146,14 +149,13 @@ switch noiselevel
     case 'inputsnr'
         fprintf("\ngenerate noise from input SNR  .. ")
         % user-specified input signal to noise ratio
-        tau = norm(vis) / (10^(isnr/20)) /sqrt( (nmeas + 2*sqrt(nmeas)));
+        tau = norm(meas) / (10^(isnr/20)) /sqrt( (nmeas + 2*sqrt(nmeas)));
         noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
 end
 
 % data
 fprintf("\nsimulate data  .. ")
-% y = vis + noise;
-y = vis;
+y = meas + noise;
 
 %% back-projected data
 fprintf("\nget (non-normalised) back-projected data  .. ")
@@ -171,8 +173,8 @@ end
 % whitening vector
 fprintf("\nsave data file  .. ")
 mkdir 'results'
-matfilename = "results/ngc6543a_data_ROP_unit500.mat" ;
-dirtyfilename = "results/ngc6543a_dirty_ROP_unit500.fits" ; 
+matfilename = "results/ngc6543a_data_ROP_unit100.mat" ;
+dirtyfilename = "results/ngc6543a_dirty_ROP_unit100.fits" ; 
 gtfilename = "results/ngc6543a_gt.fits" ;
 
 % save mat file
