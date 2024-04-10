@@ -1,4 +1,4 @@
-function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, resolution_param, nufft_param)
+function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, resolution_param, ROP_param, nufft_param)
 % Generate the measurement op and its adjoint from a sampling pattern and
 % user input settings
 % operator (adapted from original code associated with
@@ -19,6 +19,8 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, re
 %     size in arcsec ``resolution_param.pixelSize``  or the superresolution
 %     factor ``resolution_param.superresolution``, ideally in the range [1.5, 2.5]. Default:
 %     ``resolution_param.superresolution=1``.
+% ROP_param : struct
+%     Structure containing the parameters for applying ROPs on the measurements.
 % nufft_param : struct (optional)
 %     Structure containing parameters of NUFFT
 % Returns
@@ -35,13 +37,25 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, re
 % Author: A. Dabbech 
 
 %% [hardcoded] NUFFT parameters
-if nargin < 6
+if nargin < 7
     nufft_param.N = imsize; % image size
     nufft_param.J = [7, 7]; % kernel size
     nufft_param.K = 2 * imsize; % Fourier space size
     nufft_param.nshift = imsize / 2; % Fourier shift (matlab convention)
     nufft_param.ktype = 'minmax:kb'; % kernel type
 end
+
+% Check if ROP should be applied
+if nargin < 6
+    use_ROP = false;
+else
+    if isfield(ROP_param, 'alpha')
+        use_ROP = true;
+    else 
+        use_ROP = false;
+    end
+end
+
 %%  pixel resolution
 % compute maximum projected baseline (nominal resolution)
 maxProjBaseline = sqrt(max(u.^2 + v.^2));
@@ -70,7 +84,6 @@ end
 %% define imaging spatial Fourier bandwidth
 imagingBandwidth = maxProjBaseline * superresolution;
 
-
 %% compute G matrix, associated scale parameter (gridding correction function), & Fourier operators
 [Ft, IFt, G, scale] = op_nufft([-v, u].*(pi/imagingBandwidth), nufft_param.N, nufft_param.J, nufft_param.K, nufft_param.nshift);
 
@@ -84,8 +97,16 @@ if ~isempty(w) && nnz(w)
 end
 
 %% define the measurememt operator & its adjoint
-measop = @(x) ( G * Ft(x) ) ; 
-adjoint_measop = @(y) IFt( G' * y );
+if use_ROP
+    %% compute ROP operator
+    [D, Dt] = op_ROP(ROP_param);
+
+    measop = @(x) ( D(G * Ft(x)) ) ; 
+    adjoint_measop = @(y) IFt( G' * Dt(y) );
+else
+    measop = @(x) ( G * Ft(x) ) ; 
+    adjoint_measop = @(y) IFt( G' * y );
+end
 
 %% additional output
 if nargout == 3

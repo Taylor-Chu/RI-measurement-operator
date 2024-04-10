@@ -1,7 +1,7 @@
 % Example script to simulate RI data, using a toy Fourier sampling pattern
 
 % clc; clear ; close all;
-fprintf("*** Simulate toy radio data from a built-in astronomical image ***\n")
+fprintf("*** Simulate toy rank-one projected radio data from a built-in astronomical image ***\n")
 
 %% Setup paths
 addpath data;
@@ -12,7 +12,7 @@ addpath lib/utils;
 addpath lib/ddes_utils;
 
 %% simulation setting: realistic / toy
-simtype = 'toy'; % possible values: `realistic` ; `toy`
+use_ROP = true; % rank-one projected data
 noiselevel = 'drheuristic'; % possible values: `drheuristic` ; `inputsnr`
 superresolution = 1.5; % ratio between imaged Fourier bandwidth and sampling bandwidth
 
@@ -26,6 +26,9 @@ obsTime = 4;
 frequency  = 1e9;
 % data weighting enabled (for imaging e.g. Briggs) 
 weighting_on = false; 
+% ROP parameters
+Npb = 100; % number of projections per time instant
+rvtype = 'unitary'; % or 'gaussian
 
 
 %% ground truth image 
@@ -53,7 +56,7 @@ end
 
 % generate sampling pattern (uv-coverage)
 fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
-[umeter, vmeter, wmeter, na] = generate_uv_coverage_ROP(nTimeSamples, obsTime, telescope);
+[umeter, vmeter, wmeter, na] = generate_uv_coverage(nTimeSamples, obsTime, telescope, use_ROP);
 
 % figure(); plot(umeter, vmeter, 'o'); title('uv-coverage'); axis equal; grid on;
 
@@ -71,43 +74,22 @@ fprintf("\nbuild NUFFT measurement operator .. ")
 resolution_param.superresolution = superresolution; 
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
-% generate the random realizations.
-Npb = 100;
-rvtype = 'unitary'; % 'gaussian
-
-if strcmp(rvtype,'gaussian')
-    alpha = (randn(na,Npb,nTimeSamples)+1i*randn(na,Npb,nTimeSamples))/sqrt(2);
-    beta = (randn(na,Npb,nTimeSamples)+1i*randn(na,Npb,nTimeSamples))/sqrt(2);
-elseif strcmp(rvtype,'unitary')
-    alpha = exp(1i*2*pi*rand(na,Npb,nTimeSamples));
-    beta = exp(1i*2*pi*rand(na,Npb,nTimeSamples));
-else
-    error('Unknown random variable type.');
+% ROP parameters
+ROP_proj = struct();
+if use_ROP
+    % generate the random realizations.
+    ROP_proj = util_gen_proj(na, Npb, nTimeSamples, rvtype);
 end
 
-ROP_param = struct();
-ROP_param.alpha = alpha;
-ROP_param.beta = beta;
-
 % measurement operator
-[measop, adjoint_measop] = ops_raw_measop_ROP(u,v,w, imSize, resolution_param, ROP_param);
+[measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_proj);
  
-%% model clean visibilities 
-fprintf("\nsimulate model visibilities .. ")
+%% model clean measurements
+fprintf("\nsimulate model measurements .. ")
 meas = measop(gdthim);
 
 %number of data points
 nmeas = numel(meas);
-
-% figure(); hist(imag(meas), 100); title('Measurement amplitudes');
-
-% %% Adjoint test
-% measop_vec = @(x) measop(reshape(x, imSize));
-% adjoint_measop_vec = @(x) reshape(adjoint_measop(x), [], 1);
-% measop_shape = struct();
-% measop_shape.in = [prod(imSize), 1];
-% measop_shape.out = [nmeas, 1];
-% adjoint_test(measop_vec, adjoint_measop_vec, measop_shape);
 
 %% model data
 
@@ -143,7 +125,7 @@ switch noiselevel
         noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
 
         % input signal to noise ratio
-        isnr = 20 *log10 (norm(vis)./norm(noise));
+        isnr = 20 *log10 (norm(meas)./norm(noise));
         fprintf("\ninfo: random Gaussian noise with input SNR: %.3f db", isnr)
 
     case 'inputsnr'
@@ -154,7 +136,7 @@ switch noiselevel
 end
 
 % data
-fprintf("\nsimulate data  .. ")
+fprintf("\nsimulate noisy data  .. ")
 y = meas + noise;
 
 %% back-projected data
@@ -173,13 +155,18 @@ end
 % whitening vector
 fprintf("\nsave data file  .. ")
 mkdir 'results'
-matfilename = "results/ngc6543a_data_ROP_unit100.mat" ;
-dirtyfilename = "results/ngc6543a_dirty_ROP_unit100.fits" ; 
+if use_ROP
+    matfilename = ['results/ngc6543a_data_ROP_unit', num2str(Npb), '.mat'];
+    dirtyfilename = ['results/ngc6543a_dirty_ROP_unit', num2str(Npb),'.fits'] ; 
+else 
+    matfilename = ['results/ngc6543a_data.mat'];
+    dirtyfilename = ['results/ngc6543a_dirty.fits'] ; 
+end
 gtfilename = "results/ngc6543a_gt.fits" ;
 
 % save mat file
 nW = tau * ones(na^2*nTimeSamples,1);
-save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "alpha", "beta", '-v7.3')
+save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "ROP_proj", '-v7.3')
 % add imaging weights
 if weighting_on
     save(matfilename,"nWimag",'-append')

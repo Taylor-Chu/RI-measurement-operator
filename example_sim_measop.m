@@ -52,10 +52,18 @@ fprintf("\nbuild NUFFT measurement operator .. ")
 resolution_param.superresolution = superresolution; 
 % resolution_param.pixelSize = [];
 
+% measurement operator
 [measop, adjoint_measop] = ops_raw_measop(u, v, w, imSize, resolution_param);
 
+% %% Adjoint test
+% measop_vec = @(x) measop(reshape(x, imSize));
+% adjoint_measop_vec = @(x) reshape(adjoint_measop(x), [], 1);
+% measop_shape = struct();
+% measop_shape.in = [prod(imSize), 1];
+% measop_shape.out = [nmeas, 1];
+% adjoint_test(measop_vec, adjoint_measop_vec, measop_shape);
 
-% %% compute RI normalization factor  (just for info)
+%% compute RI normalization factor  (just for info)
 dirac = sparse((imSize(1)/2)+1 , (imSize(2)/2)+1 , 1, imSize(1),imSize(2)) ;
 psf = real(adjoint_measop(measop(full(dirac))));
 ri_normalization = max(psf,[],'all');

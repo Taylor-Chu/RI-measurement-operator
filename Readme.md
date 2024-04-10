@@ -53,12 +53,17 @@ and also made available by the author on [github](https://github.com/JeffFessler
 
 ## Examples
 
-Two examples of usage are provided: 
+Four examples of usage are provided: 
 
 1. `example_sim_measop.m` enables the simulation of the measurement operator and its adjoint from a Fourier sampling pattern.
    The script takes an input `.mat` file containing the `u`, `v`, `w` coordinates (in meter) and `frequency` (in MHz). Alternatively, a _toy_ Fourier sampling pattern can be generated using `data/` utilities.
-2. `example_sim_ri_data.m` enables the simulation of radio-inteferometric data from a given ground truth image and a Fourier sampling pattern.
-   
+2. `example_sim_measop_ROP.m` Same as 1. but with the ROP operator.
+3. `example_sim_ri_data.m` enables the simulation of radio-inteferometric data from a given ground truth image and a Fourier sampling pattern.
+4. `example_sim_ri_data_ROP.m` Same as 3. but with the ROP operator.
+
+> [!NOTE]
+> You cannot set ``use_ROP=true;`` and ``sim_type=realistic`` at the same time.
+> It is not possible to apply ROP on a uv-coverage which is non-square. The ROP operators can only be applied on the complete square interferometric matrix.
 
 ## Contributions
 
