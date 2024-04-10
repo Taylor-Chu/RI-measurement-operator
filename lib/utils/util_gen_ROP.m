@@ -1,4 +1,4 @@
-function ROP_proj = util_gen_ROP_proj(na, Npb, nTimeSamples, rvtype)
+function ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type)
     % Generate random projection vectors
     % na: number of antennas
     % Npb: number of projections per time instant

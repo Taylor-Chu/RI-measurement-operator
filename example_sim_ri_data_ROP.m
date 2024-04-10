@@ -27,7 +27,7 @@ frequency  = 1e9;
 weighting_on = false; 
 % ROP parameters
 Npb = 500; % number of projections per time instant
-ROP_type = 'separated'; % rank-one projected data. ['none', 'separated', 'batch']
+ROP_type = 'batch'; % rank-one projected data. ['none', 'separated', 'batch']
 rvtype = 'unitary'; % or 'gaussian
 
 %% flag for using ROPs
@@ -86,7 +86,7 @@ resolution_param.superresolution = superresolution;
 ROP_param = struct();
 if use_ROP
     % generate the random realizations.
-    ROP_proj = util_gen_ROP_proj(na, Npb, nTimeSamples, rvtype);
+    ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type);
 end
 
 % measurement operator

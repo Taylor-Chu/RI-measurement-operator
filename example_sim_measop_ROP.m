@@ -12,12 +12,7 @@ addpath lib/ddes_utils;
 % image characteristics
 imSize = [512, 512];
 % simulations settings
-use_ROP = true;
 superresolution = 1; % ratio between imaged Fourier bandwidth and sampling bandwidth
-
-% ROP parameters
-Npb = 100; % number of projections per time instant
-rvtype = 'unitary'; % or 'gaussian
 
 % antenna configuration
 telescope = 'vlaa';
@@ -27,6 +22,19 @@ nTimeSamples = 100;
 obsTime = 5;
 % obs. frequency in MHz
 frequency  = 1e9;
+% ROP parameters
+Npb = 500; % number of projections per time instant
+ROP_type = 'separated'; % rank-one projected data. ['none', 'separated', 'batch']
+rvtype = 'unitary'; % or 'gaussian
+
+%% flag for using ROPs
+if strcmp(ROP_type, 'separated') || strcmp(ROP_type, 'batch')
+    use_ROP = true;
+elseif strcmp(ROP_type, 'none')
+    use_ROP = false;
+else
+    error('ROP_type not recognized')
+end
 
 %% Fourier sampling pattern 
 % generate sampling pattern (uv-coverage)
@@ -47,7 +55,7 @@ resolution_param.superresolution = superresolution;
 ROP_param = struct();
 if use_ROP
     % generate the random realizations.
-    ROP_proj = util_gen_ROP_proj(na, Npb, nTimeSamples, rvtype);
+    ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type);
 end 
 
 % measurement operator
