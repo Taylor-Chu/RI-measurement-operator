@@ -1,4 +1,4 @@
-function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, resolution_param, ROP_param, nufft_param)
+function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, resolution_param, ROP_proj, nufft_param)
 % Generate the measurement op and its adjoint from a sampling pattern and
 % user input settings
 % operator (adapted from original code associated with
@@ -19,7 +19,7 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, re
 %     size in arcsec ``resolution_param.pixelSize``  or the superresolution
 %     factor ``resolution_param.superresolution``, ideally in the range [1.5, 2.5]. Default:
 %     ``resolution_param.superresolution=1``.
-% ROP_param : struct
+% ROP_proj : struct
 %     Structure containing the parameters for applying ROPs on the measurements.
 % nufft_param : struct (optional)
 %     Structure containing parameters of NUFFT
@@ -49,7 +49,7 @@ end
 if nargin < 6
     use_ROP = false;
 else
-    if isfield(ROP_param, 'alpha')
+    if isfield(ROP_proj, 'alpha')
         use_ROP = true;
     else 
         use_ROP = false;
@@ -99,7 +99,7 @@ end
 %% define the measurememt operator & its adjoint
 if use_ROP
     %% compute ROP operator
-    [D, Dt] = op_ROP(ROP_param);
+    [D, Dt] = op_ROP(ROP_proj);
 
     measop = @(x) ( D(G * Ft(x)) ) ; 
     adjoint_measop = @(y) IFt( G' * Dt(y) );

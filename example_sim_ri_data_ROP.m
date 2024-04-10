@@ -86,7 +86,7 @@ resolution_param.superresolution = superresolution;
 ROP_param = struct();
 if use_ROP
     % generate the random realizations.
-    ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype, ROP_type);
+    ROP_proj = util_gen_ROP_proj(na, Npb, nTimeSamples, rvtype);
 end
 
 % measurement operator
