@@ -44,14 +44,14 @@ resolution_param.superresolution = superresolution;
 % resolution_param.pixelSize = [];
 
 % ROP parameters
-ROP_proj = struct();
+ROP_param = struct();
 if use_ROP
     % generate the random realizations.
-    ROP_proj = util_gen_proj(na, Npb, nTimeSamples, rvtype);
+    ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype);
 end 
 
 % measurement operator
-[measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_proj);
+[measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_param);
 
 % %% compute RI normalization factor  (just for info)
 dirac = sparse((imSize(1)/2)+1 , (imSize(2)/2)+1 , 1, imSize(1),imSize(2)) ;

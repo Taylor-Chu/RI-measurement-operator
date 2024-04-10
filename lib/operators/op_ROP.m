@@ -20,11 +20,15 @@ function [D,Dt] = op_ROP(ROP_param)
     % extract parameters
     alpha = ROP_param.alpha;
     beta = ROP_param.beta;
+    type = ROP_param.type;
 
-    D = @(x) sep_ROP(alpha, x, beta);
-    Dt = @(y) sep_ROPt(alpha, y, beta);
-    % D = @(x) batch_ROP(alpha, x, beta);
-    % Dt = @(y) batch_ROPt(alpha, y, beta);
+    if strcmp(type, 'separated')    
+        D = @(x) sep_ROP(alpha, x, beta);
+        Dt = @(y) sep_ROPt(alpha, y, beta);
+    elseif strcmp(type, 'batch')
+        D = @(x) batch_ROP(alpha, x, beta);
+        Dt = @(y) batch_ROPt(alpha, y, beta);
+    end
 
 end
     

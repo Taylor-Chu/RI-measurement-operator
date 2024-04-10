@@ -12,7 +12,6 @@ addpath lib/utils;
 addpath lib/ddes_utils;
 
 %% simulation setting: realistic / toy
-use_ROP = true; % rank-one projected data
 noiselevel = 'drheuristic'; % possible values: `drheuristic` ; `inputsnr`
 superresolution = 1.5; % ratio between imaged Fourier bandwidth and sampling bandwidth
 
@@ -27,9 +26,18 @@ frequency  = 1e9;
 % data weighting enabled (for imaging e.g. Briggs) 
 weighting_on = false; 
 % ROP parameters
-Npb = 100; % number of projections per time instant
+Npb = 500; % number of projections per time instant
+ROP_type = 'separated'; % rank-one projected data. ['none', 'separated', 'batch']
 rvtype = 'unitary'; % or 'gaussian
 
+%% flag for using ROPs
+if strcmp(ROP_type, 'separated') || strcmp(ROP_type, 'batch')
+    use_ROP = true;
+elseif strcmp(ROP_type, 'none')
+    use_ROP = false;
+else
+    error('ROP_type not recognized')
+end
 
 %% ground truth image 
 fprintf("\nread ground truth image  .. ")
@@ -75,14 +83,14 @@ resolution_param.superresolution = superresolution;
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
 % ROP parameters
-ROP_proj = struct();
+ROP_param = struct();
 if use_ROP
     % generate the random realizations.
-    ROP_proj = util_gen_proj(na, Npb, nTimeSamples, rvtype);
+    ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype, ROP_type);
 end
 
 % measurement operator
-[measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_proj);
+[measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_param);
  
 %% model clean measurements
 fprintf("\nsimulate model measurements .. ")
@@ -156,8 +164,9 @@ end
 fprintf("\nsave data file  .. ")
 mkdir 'results'
 if use_ROP
-    matfilename = ['results/ngc6543a_data_ROP_unit', num2str(Npb), '.mat'];
-    dirtyfilename = ['results/ngc6543a_dirty_ROP_unit', num2str(Npb),'.fits'] ; 
+    ROP_text = ['_ROP_', ROP_type, '_', rvtype, num2str(Npb)];
+    matfilename = ['results/ngc6543a_data', ROP_text, '.mat'];
+    dirtyfilename = ['results/ngc6543a_dirty', ROP_text,'.fits'] ; 
 else 
     matfilename = ['results/ngc6543a_data.mat'];
     dirtyfilename = ['results/ngc6543a_dirty.fits'] ; 
@@ -166,7 +175,7 @@ gtfilename = "results/ngc6543a_gt.fits" ;
 
 % save mat file
 nW = tau * ones(na^2*nTimeSamples,1);
-save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "ROP_proj", '-v7.3')
+save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "ROP_param", '-v7.3')
 % add imaging weights
 if weighting_on
     save(matfilename,"nWimag",'-append')

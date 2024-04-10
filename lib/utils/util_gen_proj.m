@@ -1,9 +1,10 @@
-function ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype)
+function ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype, ROP_type)
     % Generate random projection vectors
     % na: number of antennas
     % Npb: number of projections per time instant
     % nTimeSamples: number of time instants
     % rvtype: type of random variable ('gaussian' or 'unitary')
+    % ROP_type: type of ROP ('separated' or 'batch')
 
     if strcmp(rvtype,'gaussian')
         alpha = (randn(na,Npb,nTimeSamples)+1i*randn(na,Npb,nTimeSamples))/sqrt(2);
@@ -18,5 +19,7 @@ function ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype)
     ROP_param = struct();
     ROP_param.alpha = alpha;
     ROP_param.beta = beta;
+    ROP_param.type = ROP_type;
+    ROP_param.rvtype = rvtype;
 
 end
