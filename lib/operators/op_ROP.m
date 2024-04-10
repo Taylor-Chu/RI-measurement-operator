@@ -1,9 +1,9 @@
-function [D,Dt] = op_ROP(ROP_param)
+function [D,Dt] = op_ROP(ROP_proj)
     % Create the operator the applies separated ROPs per batch.
     %
     % Parameters
     % ----------
-    % ROP_param : struct
+    % ROP_proj : struct
     %     Parameters for the ROP operator.
     %   .alpha : 3D array
     %       The left side projection vectors.
@@ -18,8 +18,8 @@ function [D,Dt] = op_ROP(ROP_param)
     %     Adjoint operator.
     
     % extract parameters
-    alpha = ROP_param.alpha;
-    beta = ROP_param.beta;
+    alpha = ROP_proj.alpha;
+    beta = ROP_proj.beta;
 
     D = @(x) sep_ROP(alpha, x, beta);
     Dt = @(y) sep_ROPt(alpha, y, beta);

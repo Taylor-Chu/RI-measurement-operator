@@ -1,4 +1,4 @@
-function ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype)
+function ROP_proj = util_gen_ROP_proj(na, Npb, nTimeSamples, rvtype)
     % Generate random projection vectors
     % na: number of antennas
     % Npb: number of projections per time instant
@@ -15,8 +15,8 @@ function ROP_param = util_gen_proj(na, Npb, nTimeSamples, rvtype)
         error('Unknown random variable type.');
     end
 
-    ROP_param = struct();
-    ROP_param.alpha = alpha;
-    ROP_param.beta = beta;
+    ROP_proj = struct();
+    ROP_proj.alpha = alpha;
+    ROP_proj.beta = beta;
 
 end
