@@ -1,5 +1,5 @@
 function [z] = batch_ROPt(A,y,B)
-    % Function to compute ROPs
+    % Adjoint of the batched ROPs.
     % Args:
     %   A: (n,m,b) array
     %   y: (m) array

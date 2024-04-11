@@ -28,7 +28,7 @@ function [D,Dt] = op_ROP(ROP_param)
         D = @(x) sep_ROP2(alpha, x, beta);
         Dt = @(y) sep_ROPt(alpha, y, beta);
     elseif strcmp(type, 'batch')
-        D = @(x) batch_ROP(alpha, x, beta);
+        D = @(x) batch_ROP2(alpha, x, beta);
         Dt = @(y) batch_ROPt(alpha, y, beta);
     end
 

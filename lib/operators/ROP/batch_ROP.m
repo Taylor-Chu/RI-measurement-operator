@@ -1,5 +1,5 @@
 function [y] = batch_ROP(A,X,B)
-    % Function to compute ROPs
+    % Apply batched ROPs, which is separated ROPs summed over the time instants.
     % Args:
     %   A: (n,m,b) array
     %   X: (n^2*b) array
@@ -11,11 +11,6 @@ function [y] = batch_ROP(A,X,B)
 
     % reshape X to a matrix
     X = reshape(X, [b, n^2]);
-
-    % % verify that the first term is hermitian when reshaped
-    % tmp = reshape(X(:,1), [n,n]);
-    % figure(); imagesc(real(tmp)); colorbar; hold on;
-    % assert(norm(tmp - tmp') < 1e-10, 'X is not hermitian')
 
     % verify compatibility of dimensions
     if size(X,1) ~= b || size(X,2) ~= n^2
