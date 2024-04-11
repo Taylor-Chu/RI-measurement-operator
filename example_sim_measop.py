@@ -12,16 +12,6 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Read uv and imweight files')
     parser.add_argument('--yaml_file', type=str, default='./configs/measop.yaml',
                     help='Path to the yaml file containing the arguments')
-    # parser.add_argument('--data_file', type=str, required=True,
-    #                     help='Path to the file containing u, v and imweight')
-    # parser.add_argument('--im_size', type=int, nargs=2, required=True,
-    #                     help='Size of the image')
-    # parser.add_argument('--superresolution', type=float, default=1.,
-    #                 help='Super resolution factor')
-    # parser.add_argument('--nufft', choices=['pynufft', 'tkbn'], required=True,
-    #                     help='Nufft library to be used')
-    # parser.add_argument('--on_gpu', action='store_true',
-    #                     help='Utilise GPU')
     return parser.parse_args()
 
 def gen_measop(args):

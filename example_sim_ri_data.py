@@ -13,22 +13,6 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Read uv and imweight files')
     parser.add_argument('--yaml_file', type=str, default='./configs/sim_ri_data.yaml',
                         help='Path to the yaml file containing the arguments')
-    # parser.add_argument('--data_file', type=str, required=True,
-    #                     help='Path to the file containing u, v and imweight')
-    # parser.add_argument('--gdth_file', type=str, required=True,
-    #                     help='Path to the file containing the ground truth image')
-    # parser.add_argument('--superresolution', type=float, default=1.,
-    #                 help='Super resolution factor')
-    # parser.add_argument('--nufft', choices=['pynufft', 'tkbn'], required=True,
-    #                     help='Nufft library to be used')
-    # parser.add_argument('--noise_heuristic', type=float, default=None,
-    #                     help='Target dynamic range of the ground truth image')
-    # parser.add_argument('--noise_isnr', type=float, default=None,
-    #                     help='Input signa-to-noise ratio')
-    # parser.add_argument('--on_gpu', action='store_true',
-    #                     help='Utilise GPU')
-    # parser.add_argument('--dict_save_foldername', type=str, default='results',
-    #                     help='Path to save the dictionary containing data')
     return parser.parse_args()
 
 def main(args):
