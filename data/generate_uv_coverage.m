@@ -1,4 +1,4 @@
-function [u_ab, v_ab, w_ab, na, antennas] = generate_uv_coverage(T, hrs, cov_type, varargin)
+function [u_ab, v_ab, w_ab, na, antennas] = generate_uv_coverage(T, hrs, cov_type, use_ROP, varargin)
 
     % Generate uv coverage for a given array configuration.
     %
@@ -6,6 +6,7 @@ function [u_ab, v_ab, w_ab, na, antennas] = generate_uv_coverage(T, hrs, cov_typ
     %     T: Number of time samples.
     %     hrs: Number of hours.
     %     cov_type: Type of array configuration.
+    %     use_ROP: Use ROPs. If true, generate the complete square covariance matrix.
     %     varargin: Additional arguments.
     %
     % Returns:
@@ -52,7 +53,7 @@ function [u_ab, v_ab, w_ab, na, antennas] = generate_uv_coverage(T, hrs, cov_typ
     end
 
     % check if use_ROP was provided
-    if ~any(strcmp(varargin, 'use_ROP'))
+    if nargin < 4
         use_ROP = false;
     end
     
