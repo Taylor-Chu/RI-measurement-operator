@@ -9,6 +9,8 @@ function [D,Dt] = op_ROP(ROP_param)
     %       The left side projection vectors.
     %   .beta : 3D array
     %       The right side projection vectors.
+    %   .type : string
+    %       The ROP model. 'separated' or 'batch'.
     %
     % Returns
     % -------
