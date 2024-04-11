@@ -31,6 +31,11 @@ function [] = adjoint_test(A, A_star, A_shape)
         At_op = A_star;
     end
 
+    % size(u)
+    % size(v)
+    % size(A_op(v))
+    % size(At_op(u))
+
     score = abs(dot(u, A_op(v)) - dot(At_op(u), v))/(norm(u).*norm(A_op(v)));
 
     assert(score < 1e-8, sprintf('A and At are not adjoint, |<u,Av>-<A*u,v>|=%.2e||u|| ||Av||', score))

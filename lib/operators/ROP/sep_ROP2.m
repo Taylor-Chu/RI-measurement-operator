@@ -1,4 +1,4 @@
-function [y] = sep_ROP(A,X,B)
+function [y] = sep_ROP2(A,X,B)
     % Function to compute ROPs separated per batch
     % Args:
     %   A: (n,m,b) array
@@ -10,20 +10,22 @@ function [y] = sep_ROP(A,X,B)
     [n,m,b] = size(A);
 
     % reshape X to a matrix
-    X = reshape(X, [b, n^2]);
+    X = reshape(X, [b, n, n]);
+    X = permute(X, [2,3,1]); % (n,n,b)
 
     % verify compatibility of dimensions
-    if size(X,1) ~= b || size(X,2) ~= n^2
+    if size(X,1) ~= n || size(X,2) ~= n || size(X,3) ~= b
         error('Dimension mismatch between A and X');
     end
     if size(B,1) ~= n || size(B,2) ~= m || size(B,3) ~= b
         error('Dimension mismatch between X and B');
     end
 
-    y = zeros(m,b);
-    for i = 1:b
-        y(:,i) = ROP(A(:,:,i), X(i,:), B(:,:,i));
-    end
-    y = y(:);
+    Rbeta = pagemtimes(X, B); % (n,n,b) x (n,m,b) = (n,m,b)
+
+    y = sum(conj(A).*Rbeta, 1); % (m,b)
+    y = y/sqrt(m); % (m,b) normalization
+
+    y = y(:); % (m*b)
 
 end

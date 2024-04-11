@@ -1,5 +1,5 @@
 function [z] = sep_ROPt(A,y,B)
-    % Function to compute ROPs
+    % Adjoint of sep_ROP
     % Args:
     %   A: (n,m,b) array
     %   y: (m*b) array

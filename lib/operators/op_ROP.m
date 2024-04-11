@@ -25,7 +25,7 @@ function [D,Dt] = op_ROP(ROP_param)
     type = ROP_param.type;
 
     if strcmp(type, 'separated')    
-        D = @(x) sep_ROP(alpha, x, beta);
+        D = @(x) sep_ROP2(alpha, x, beta);
         Dt = @(y) sep_ROPt(alpha, y, beta);
     elseif strcmp(type, 'batch')
         D = @(x) batch_ROP(alpha, x, beta);
