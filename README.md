@@ -33,33 +33,18 @@ The code relies on external NUFFT Python libraries, both implementing the NUFFT 
 
 - pyNUFFT [(https://github.com/jyhmiinlin/pynufft)](https://github.com/jyhmiinlin/pynufft).
 
-Install the packages using the command below:
+### Pip
+With the desired virtual environment activated, install the packages using the command below:
 ``` bash
-   pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-## Dependencies (Conda)
-
+### Conda
+Create a new conda environment and install the packages from the provided `requirements_conda.yml` file:
 ```
-conda env create -f dependencies.yml 
+conda env create -f requirements_conda.yml 
 ```
-If the conda command is not recognized, read [CONDA_INSTALL.md](CONDA_INSTALL.md).
-
-To activate this environment, use
-```
-conda activate RI-meas-op / source activate RI-meas-op
-```
-To deactivate an active environment, use
-```
-conda deactivate / source deactivate
-```
-where ``source`` might be needed for recent versions of conda.
-
----
-If you want another environment name, write
-```
-conda env create -f dependencies.yml --name <your_env_name>
-```
+If the conda command is not recognized and for more details regarding conda, read [conda_install.md](conda_install.md).
 
 ## Examples
 
