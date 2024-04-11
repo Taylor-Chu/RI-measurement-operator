@@ -61,6 +61,18 @@ end
 % measurement operator
 [measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_param);
 
+%% perform the adjoint test
+measop_vec = @(x) ( measop(reshape(x, imSize)) ); 
+adjoint_measop_vec = @(y) reshape(adjoint_measop(y), [prod(imSize), 1]);
+measop_shape = struct();
+measop_shape.in = [prod(imSize), 1];
+if strcmp(ROP_type, 'separated')
+    measop_shape.out = [Npb*nTimeSamples,1];
+elseif strcmp(ROP_type, 'batch')
+    measop_shape.out = [Npb,1];
+end
+adjoint_test(measop_vec, adjoint_measop_vec, measop_shape);
+
 % %% compute RI normalization factor  (just for info)
 dirac = sparse((imSize(1)/2)+1 , (imSize(2)/2)+1 , 1, imSize(1),imSize(2)) ;
 psf = real(adjoint_measop(measop(full(dirac))));
