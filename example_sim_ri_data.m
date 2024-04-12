@@ -34,6 +34,7 @@ switch simtype
         % data weighting enabled (for imaging e.g. Briggs) 
         weighting_on = false; 
 end
+
 %% ground truth image 
 fprintf("\nread ground truth image  .. ")
 % built-in matlab image
@@ -66,6 +67,11 @@ switch simtype
         vmeter =  uvwdata.v;
         wmeter =  uvwdata.w;
         clear uvwdata
+        speedOfLight = 299792458;
+        u = umeter ./ (speedOfLight/frequency) ;
+        v = vmeter ./ (speedOfLight/frequency) ;
+        w = wmeter ./ (speedOfLight/frequency) ;
+        
         % for info 
         try nominalPixelSize = double(load(myuvwdatafile,'nominal_pixelsize').nominal_pixelsize);
         end
@@ -83,14 +89,8 @@ switch simtype
     case 'toy'       
         % generate sampling pattern (uv-coverage)
         fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
-        [umeter, vmeter, wmeter] = generate_uv_coverage(nTimeSamples, obsTime, telescope);
+        [u, v, w, na] = generate_uv_coverage(frequency, nTimeSamples, obsTime, telescope);
 end
-
-% convert uvw in units of the wavelength
-speedOfLight = 299792458;
-u = umeter ./ (speedOfLight/frequency) ;
-v = vmeter ./ (speedOfLight/frequency) ;
-w = wmeter ./ (speedOfLight/frequency) ;
 
 % maximum projected baseline (just for info)
 maxProjBaseline  = sqrt(max(u.^2+v.^2));
@@ -111,46 +111,7 @@ nmeas = numel(vis);
 %% model data
 
 % noise vector
-switch noiselevel
-    case 'drheuristic'
-        fprintf("\ngenerate noise (noise level commensurate of the target dynamic range) .. ")
-       
-        if weighting_on 
-            % include weights in the measurement op.
-            measop_1 = @(x) (nWimag.*measop(x));
-            adjoint_measop_1 = @(x) (adjoint_measop(nWimag.*x));
-            measopSpectralNorm_1 = op_norm(measop_1, @(y) real(adjoint_measop_1(y)), imSize, 10^-4, 500, 0);
-
-            measop_2 = @(x) ((nWimag.^2) .* measop(x));
-            adjoint_measop_2 = @(x) (adjoint_measop((nWimag.^2).*x));
-            measopSpectralNorm_2 = op_norm(measop_2, @(y) real(adjoint_measop_2(y)), imSize, 10^-4, 500, 0);
-
-            % correction factor
-            eta_correction = sqrt(measopSpectralNorm_2/measopSpectralNorm_1);
-
-            % noise standard deviation heuristic
-            tau  = sqrt(2 * measopSpectralNorm_1) / targetDynamicRange /eta_correction;
-        else
-            % compute measop spectral norm to infer the noise heuristic
-            measopSpectralNorm = op_norm(measop, @(y) real(adjoint_measop(y)), imSize, 10^-4, 500, 0);
-            eta_correction = 1;
-            % noise standard deviation heuristic
-            tau  = sqrt(2 * measopSpectralNorm) / targetDynamicRange ;
-        end
-        
-        % noise realization(mean-0; std-tau)
-        noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
-
-        % input signal to noise ratio
-        isnr = 20 *log10 (norm(vis)./norm(noise));
-        fprintf("\ninfo: random Gaussian noise with input SNR: %.3f db", isnr)
-
-    case 'inputsnr'
-        fprintf("\ngenerate noise from input SNR  .. ")
-        % user-specified input signal to noise ratio
-        tau = norm(vis) / (10^(isnr/20)) /sqrt( (nmeas + 2*sqrt(nmeas)));
-        noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
-end
+[tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, vis, noise_param, weighting_on);
 
 % data
 fprintf("\nsimulate data  .. ")

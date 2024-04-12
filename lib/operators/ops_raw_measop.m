@@ -116,4 +116,4 @@ elseif nargout == 4
     varargout{2} = {scale};
 end
 
-
+end

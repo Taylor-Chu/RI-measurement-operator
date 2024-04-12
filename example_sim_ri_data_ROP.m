@@ -23,8 +23,6 @@ nTimeSamples = 100;
 obsTime = 4;
 % obs. frequency in MHz
 frequency  = 1e9;
-% data weighting enabled (for imaging e.g. Briggs) 
-weighting_on = false; 
 % ROP parameters
 Npb = 200; % number of projections per time instant
 ROP_type = 'dependent'; % rank-one projected data. ['none', 'separated', 'batch', 'dependent']
@@ -96,7 +94,7 @@ nmeas = numel(meas); %number of data points
 %% model data
 
 % noise vector
-[tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, weighting_on, noise_param);
+[tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, noise_param);
 
 % data
 fprintf("\nsimulate noisy data  .. ")
@@ -104,16 +102,9 @@ y = meas + noise;
 
 %% back-projected data
 fprintf("\nget (non-normalised) back-projected data  .. ")
-if weighting_on
-    y_weighted = (nWimag.^2).*y; 
-    dirty = real( adjoint_measop(y_weighted) );
-    dirty = reshape(dirty, imSize);
-    figure(2), imagesc(dirty), colorbar, title ('dirty image (weights applied)'), axis image,   axis off,
-else
-    dirty = real( adjoint_measop(y) );
-    dirty = reshape(dirty, imSize);
-    figure(2), imagesc(dirty), colorbar, title ('dirty image'), axis image,   axis off,
-end
+dirty = real( adjoint_measop(y) );
+dirty = reshape(dirty, imSize);
+figure(2), imagesc(dirty), colorbar, title ('dirty image'), axis image,   axis off,
 
 %% generate input data file for uSARA/AIRI/R2D2 imager  (just for info)
 % whitening vector
@@ -132,10 +123,6 @@ gtfilename = "results/ngc6543a_gt.fits" ;
 % save mat file
 nW = tau * ones(na^2*nTimeSamples,1);
 save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "ROP_param", '-v7.3')
-% add imaging weights
-if weighting_on
-    save(matfilename,"nWimag",'-append')
-end
 
 % save (non-normalised) dirty image
 fitswrite(dirty, dirtyfilename)

@@ -14,6 +14,10 @@ function [u, v, w, na] = generate_uv_coverage(frequency, T, hrs, cov_type, use_R
     %     v_ab: V coordinates. (na^2, T)
     %     w_ab: W coordinates. (na^2, T)
     %     na: Number of antennas.
+
+    if nargin < 5
+        use_ROP = false;
+    end
     
     % ----------------------------------------------------- %
     switch cov_type

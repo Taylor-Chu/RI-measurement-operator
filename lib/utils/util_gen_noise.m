@@ -1,12 +1,16 @@
-function [tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, weighting_on, noise_param)
+function [tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, noise_param, weighting_on)
     % generate noise realization for the measurements.
     %
     % args:
     %   measop: measurement operator
     %   adjoint_measop: adjoint of the measurement operator
     %   meas: measurements
-    %   weighting_on: boolean flag to indicate if the measurement operator includes visibility weighting
     %   noise_param: noise level specification
+    %   weighting_on: boolean flag to indicate if the measurement operator includes visibility weighting
+
+    if nargin < 6
+        weighting_on = false;
+    end
 
     nmeas = numel(meas);
 
