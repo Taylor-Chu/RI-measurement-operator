@@ -1,15 +1,18 @@
-function [tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, noise_param, weighting_on)
+function [tau, noise] = util_gen_noise(raw_measop, adjoint_raw_measop, imSize, meas, noise_param, weight_param)
     % generate noise realization for the measurements.
     %
     % args:
-    %   measop: measurement operator
-    %   adjoint_measop: adjoint of the measurement operator
+    %   raw_measop: raw measurement operator
+    %   adjoint_raw_measop: adjoint of the raw measurement operator
     %   meas: measurements
     %   noise_param: noise level specification
-    %   weighting_on: boolean flag to indicate if the measurement operator includes visibility weighting
+    %   weight_param: parameters associated to visibility weighting
 
     if nargin < 6
         weighting_on = false;
+    else
+        weighting_on = weight_param.weighting_on;
+        nWimag = weight_param.nWimag;
     end
 
     nmeas = numel(meas);
@@ -22,12 +25,12 @@ function [tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, noi
         
             if weighting_on 
                 % include weights in the measurement op.
-                measop_1 = @(x) (nWimag.*measop(x));
-                adjoint_measop_1 = @(x) (adjoint_measop(nWimag.*x));
+                measop_1 = @(x) (nWimag.*raw_measop(x));
+                adjoint_measop_1 = @(x) (adjoint_raw_measop(nWimag.*x));
                 measopSpectralNorm_1 = op_norm(measop_1, @(y) real(adjoint_measop_1(y)), imSize, 10^-4, 500, 0);
 
-                measop_2 = @(x) ((nWimag.^2) .* measop(x));
-                adjoint_measop_2 = @(x) (adjoint_measop((nWimag.^2).*x));
+                measop_2 = @(x) ((nWimag.^2) .* raw_measop(x));
+                adjoint_measop_2 = @(x) (adjoint_raw_measop((nWimag.^2).*x));
                 measopSpectralNorm_2 = op_norm(measop_2, @(y) real(adjoint_measop_2(y)), imSize, 10^-4, 500, 0);
 
                 % correction factor
@@ -37,7 +40,7 @@ function [tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, noi
                 tau  = sqrt(2 * measopSpectralNorm_1) / targetDynamicRange /eta_correction;
             else
                 % compute measop spectral norm to infer the noise heuristic
-                measopSpectralNorm = op_norm(measop, @(y) real(adjoint_measop(y)), imSize, 10^-4, 500, 0);
+                measopSpectralNorm = op_norm(raw_measop, @(y) real(adjoint_raw_measop(y)), imSize, 10^-4, 500, 0);
                 eta_correction = 1;
                 % noise standard deviation heuristic
                 tau  = sqrt(2 * measopSpectralNorm) / targetDynamicRange ;

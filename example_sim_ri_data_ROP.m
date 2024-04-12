@@ -24,6 +24,7 @@ obsTime = 4;
 % obs. frequency in MHz
 frequency  = 1e9;
 % ROP parameters
+use_ROP = true; % use rank-one projections
 Npb = 200; % number of projections per time instant
 ROP_type = 'dependent'; % rank-one projected data. ['none', 'separated', 'batch', 'dependent']
 rvtype = 'unitary'; % or 'gaussian

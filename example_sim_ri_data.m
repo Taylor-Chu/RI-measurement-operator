@@ -46,17 +46,23 @@ gdthim = gdthim./max(gdthim,[],'all');
 % characteristics
 imSize = size(gdthim);
 % display
-figure(1), imagesc(gdthim), colorbar, title ('ground truth image'), axis image,  axis off,
+figure(); imagesc(gdthim); colorbar; title('ground truth image'); axis image;  axis off;
 
 %% data noise settings
+noise_param = struct();
+noise_param.noiselevel = noiselevel;
 switch noiselevel
     case 'drheuristic'
         % dynamic range of the ground truth image
-        targetDynamicRange = 255; 
+        noise_param.targetDynamicRange = 255; 
     case 'inputsnr'
          % user-specified input signal to noise ratio
-        isnr = 40; % in dB
+        noise_param.isnr = 40; % in dB
 end
+
+%% Parameters for visibility weighting
+weight_param = struct();
+weight_param.weighting_on = weighting_on;
 
 %% Fourier sampling pattern
 switch simtype
@@ -79,10 +85,11 @@ switch simtype
         % imaging weights if available
         if weighting_on
             try nWimag = double(load(myuvwdatafile,'nWimag').nWimag);
-                nWimag = nWimag(:);
+                weight_param.nWimag = nWimag(:);
                 fprintf("\ninfo: imaging weights are found")
             catch
                 weighting_on = false;
+                weight_param.weighting_on = weighting_on;
             end
         end
 
@@ -99,11 +106,11 @@ maxProjBaseline  = sqrt(max(u.^2+v.^2));
 fprintf("\nbuild NUFFT measurement operator .. ")
 resolution_param.superresolution = superresolution; 
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
-[measop, adjoint_measop] = ops_raw_measop(u,v, w, imSize, resolution_param);
+[raw_measop, adjoint_raw_measop] = ops_raw_measop(u,v, w, imSize, resolution_param);
  
 %% model clean visibilities 
 fprintf("\nsimulate model visibilities .. ")
-vis = measop(gdthim);
+vis = raw_measop(gdthim);
 
 %number of data points
 nmeas = numel(vis);
@@ -111,21 +118,28 @@ nmeas = numel(vis);
 %% model data
 
 % noise vector
-[tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, vis, noise_param, weighting_on);
+[tau, noise] = util_gen_noise(raw_measop, adjoint_raw_measop, imSize, vis, noise_param, weight_param);
 
 % data
 fprintf("\nsimulate data  .. ")
 y = vis + noise;
 
+%% Eventually switch visibility weighting on
+if weighting_on
+    [W, Wt] = op_vis_weighting(weight_param.nWimag);
+    [measop, adjoint_measop] = ops_measop(raw_measop, adjoint_raw_measop, W, Wt);
+end
+
 %% back-projected data
 fprintf("\nget (non-normalised) back-projected data  .. ")
+title_ = 'dirty image';
 if weighting_on
     dirty = real( adjoint_measop((nWimag.^2).*y) );
-    figure(2), imagesc(dirty), colorbar, title ('dirty image (weights applied)'), axis image,   axis off,
+    title_ = [title_ , ' (weights applied)'];
 else
-    dirty = real( adjoint_measop(y) );
-    figure(2), imagesc(dirty), colorbar, title ('dirty image'), axis image,   axis off,
+    dirty = real( adjoint_raw_measop(y) );
 end
+figure(); imagesc(dirty); colorbar; title(title_); axis image; axis off;
 
 %% generate input data file for uSARA/AIRI/R2D2 imager  (just for info)
 % whitening vector

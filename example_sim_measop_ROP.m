@@ -28,7 +28,7 @@ ROP_type = 'separated'; % rank-one projected data. ['none', 'separated', 'batch'
 rvtype = 'unitary'; % or 'gaussian
 
 %% flag for using ROPs
-if strcmp(ROP_type, 'separated') || strcmp(ROP_type, 'batch')
+if strcmp(ROP_type, 'separated') || strcmp(ROP_type, 'batch') || strcmp(ROP_type, 'dependent')
     use_ROP = true;
 elseif strcmp(ROP_type, 'none')
     use_ROP = false;
@@ -39,13 +39,8 @@ end
 %% Fourier sampling pattern 
 % generate sampling pattern (uv-coverage)
 fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
-[umeter, vmeter, wmeter, na] = generate_uv_coverage(nTimeSamples, obsTime, telescope);
+[u, v, w, na] = generate_uv_coverage(frequency, nTimeSamples, obsTime, telescope, use_ROP);
 
-% convert in units of the wavelength
-speedOfLight = 299792458;
-u = umeter ./ (speedOfLight/frequency) ;
-v = vmeter ./ (speedOfLight/frequency) ;
-w = wmeter ./ (speedOfLight/frequency) ;
 %% generate meas. op & its adjoint
 fprintf("\nbuild NUFFT measurement operator .. ")
 resolution_param.superresolution = superresolution; 

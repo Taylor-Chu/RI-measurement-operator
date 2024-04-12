@@ -37,16 +37,17 @@ switch simtype
         vmeter =  uvwdata.v;
         wmeter =  uvwdata.w;
         clear uvwdata;
+        % convert in units of the wavelength
+        speedOfLight = 299792458;
+        u = umeter ./ (speedOfLight/frequency) ;
+        v = vmeter ./ (speedOfLight/frequency) ;
+        w = wmeter ./ (speedOfLight/frequency) ;
     case 'toy'
         % generate sampling pattern (uv-coverage)
         fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
-        [umeter, vmeter, wmeter] = generate_uv_coverage(nTimeSamples, obsTime, telescope);
+        [u, v, w, na] = generate_uv_coverage(frequency, nTimeSamples, obsTime, telescope, use_ROP);
 end
-% convert in units of the wavelength
-speedOfLight = 299792458;
-u = umeter ./ (speedOfLight/frequency) ;
-v = vmeter ./ (speedOfLight/frequency) ;
-w = wmeter ./ (speedOfLight/frequency) ;
+
 %% generate meas. op & its adjoint
 fprintf("\nbuild NUFFT measurement operator .. ")
 resolution_param.superresolution = superresolution; 
