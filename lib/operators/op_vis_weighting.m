@@ -13,7 +13,7 @@ function [A, At] = op_vis_weighting(weights)
     %   At : function handle
     %       Function handle that applies the adjoint visibility weighting.
     
-    A = @(x) sqrt(weights) .* x;
-    At = @(x) sqrt(weights) .* x;
+    A = @(x) weights .* x;
+    At = @(x) weights .* x;
 
 end    
