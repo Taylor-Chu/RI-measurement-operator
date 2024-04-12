@@ -104,9 +104,9 @@ function [u, v, w, na, antennas] = generate_uv_coverage(frequency, T, hrs, cov_t
 
     % convert uvw in units of the wavelength
     speedOfLight = 299792458;
-    u = 1;
-    v = 1;
-    w = 1;
+    u = 0
+    v = 0
+    w = 0
         
     end
     
