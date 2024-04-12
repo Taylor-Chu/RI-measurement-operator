@@ -1,4 +1,4 @@
-function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, resolution_param, ROP_param, nufft_param)
+function [measop, adjoint_measop, varargout] = ops_raw_measop(uv_param, imsize, resolution_param, ROP_param, nufft_param)
     % Generate the measurement op and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -6,12 +6,18 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, re
     %
     % Parameters
     % ----------
-    % u : double[1, d]
-    %     `u` coordinate in the spatial Fourier domain.
-    % v : double[1, d]
-    %    `v` coordinate in the spatial Fourier domain
-    % w : double[1, d]
-    %    `w` coordinate in the spatial Fourier domain
+    % uv_param : struct
+    %     Contains the following fields:
+    %     u : double[n,1]
+    %         u coordinates of the sampling pattern.
+    %     v : double[n,1]
+    %         v coordinates of the sampling pattern.
+    %     w : double[n,1]
+    %         w coordinates of the sampling pattern.
+    %     na: double[1,1]
+    %         number of antennas.
+    %     nTimeSamples: double[1,1]
+    %         number of time samples.
     % imsize : double[1,1]
     %     dimensions of the target image.
     % resolution_param : struct
@@ -34,8 +40,6 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, re
     % varargout : cell
     %    `` varargout{1}``: G matrix. `` varargout{2}``: grid-correction image
     
-    % Author: A. Dabbech 
-    
     %% [hardcoded] NUFFT parameters
     if nargin < 7
         nufft_param.N = imsize; % image size
@@ -54,6 +58,31 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(u,v, w, imsize, re
         else 
             use_ROP = false;
         end
+    end
+
+    %% extract the coordinates
+    u = uv_param.u;
+    v = uv_param.v;
+    w = uv_param.w;
+    na = uv_param.na;
+    T = uv_param.nTimeSamples;
+
+    %% normalize the coordinates
+    speedOfLight = 299792458;
+    frequency  = 1e9;
+    u = u ./ (speedOfLight/frequency) ;
+    v = v ./ (speedOfLight/frequency) ;
+    w = w ./ (speedOfLight/frequency) ;
+
+    if use_ROP
+        u = u(:);
+        v = v(:);
+        w = w(:);
+    else 
+        % keep only the upper triangular part of the matrices
+        u = util_keep_upper_triangular(u,na,T);
+        v = util_keep_upper_triangular(v,na,T);
+        w = util_keep_upper_triangular(w,na,T);
     end
     
     %%  pixel resolution

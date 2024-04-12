@@ -12,7 +12,9 @@ function [tau, noise] = util_gen_noise(raw_measop, adjoint_raw_measop, imSize, m
         weighting_on = false;
     else
         weighting_on = weight_param.weighting_on;
-        nWimag = weight_param.nWimag;
+        if weighting_on
+            nWimag = weight_param.nWimag;
+        end
     end
 
     nmeas = numel(meas);
