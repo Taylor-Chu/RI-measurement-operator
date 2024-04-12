@@ -21,11 +21,10 @@ function [y] = sep_ROP2(A,X,B)
         error('Dimension mismatch between X and B');
     end
 
-    Rbeta = pagemtimes(X, B); % (n,n,b) x (n,m,b) = (n,m,b)
+    XB = pagemtimes(X, B); % (n,n,b) x (n,m,b) = (n,m,b)
 
-    y = sum(conj(A).*Rbeta, 1); % (m,b)
+    y = sum(conj(A).*XB, 1); % (m,b)
     y = y/sqrt(m); % (m,b) normalization
-
     y = y(:); % (m*b)
 
 end

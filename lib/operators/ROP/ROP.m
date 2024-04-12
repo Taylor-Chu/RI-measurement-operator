@@ -20,8 +20,8 @@ function [y] = ROP(A,X,B)
         error('Dimension mismatch between X and B');
     end
 
-    Rbeta_b = X * B; % (n,m)
-    y = sum(conj(A) .* Rbeta_b, 1); % (m)
+    RB_b = X * B; % (n,m)
+    y = sum(conj(A) .* RB_b, 1); % (m)
     y = transpose(y);
     y = y/sqrt(m);
 

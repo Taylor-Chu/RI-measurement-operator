@@ -1,11 +1,11 @@
-function [z] = sep_ROPt(A,y,B)
+function [AyB_star] = sep_ROPt(A,y,B)
     % Adjoint of sep_ROP
     % Args:
     %   A: (n,m,b) array
     %   y: (m*b) array
     %   B: (n,m,b) array
     % Returns:
-    %   z: (n^2*b) array
+    %   AyB_star: (n^2*b) array
 
     [n,m,b] = size(A);
 
@@ -19,10 +19,10 @@ function [z] = sep_ROPt(A,y,B)
         error('Dimension mismatch between y and A');
     end
 
-    z = zeros(b,n^2);
+    AyB_star = zeros(b,n^2);
     for i=1:b 
-        z(i,:) = ROPt(A(:,:,i),y(:,i),B(:,:,i));
+        AyB_star(i,:) = ROPt(A(:,:,i),y(:,i),B(:,:,i));
     end
-    z = z(:);
+    AyB_star = AyB_star(:);
 
 end

@@ -1,8 +1,8 @@
-function [y] = dep_ROP(A,X,B)
+function [AXB] = dep_ROP(A,X,B)
     % Function to compute dependent ROPs separated per batch
     % Args:
     %   A: (n,m,b) array
-    %   X: (n^2*b) array
+    %   X: (b*n^2) array
     %   B: (n,p,b) array
     % Returns:
     %   y: (m,p,b) array
@@ -21,13 +21,12 @@ function [y] = dep_ROP(A,X,B)
         error('Dimension mismatch between X and B');
     end
 
-    Rbeta = pagemtimes(X, B); % (n,n,b) x (n,m,b) = (n,m,b)
+    XB = pagemtimes(X, B); % (n,n,b) x (n,p,b) = (n,p,b)
 
     A = permute(A, [2,1,3]); % (m,n,b)
     
-    y = pagemtimes(conj(A), Rbeta); % (m,n,b) x (n,p,b) = (m,p,b)
-    y = y/sqrt(m); % (m,b) normalization
-
-    y = y(:); % (m*b)
+    AXB = pagemtimes(conj(A), XB); % (m,n,b) x (n,p,b) = (m,p,b)
+    AXB = AXB/sqrt(m); % (m,p,b) normalization
+    AXB = AXB(:); % (m*p*b) vectorization
 
 end
