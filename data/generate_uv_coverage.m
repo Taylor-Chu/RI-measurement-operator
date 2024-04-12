@@ -1,4 +1,4 @@
-function [u, v, w, na, antennas] = generate_uv_coverage(frequency, T, hrs, cov_type, use_ROP, varargin)
+function [u, v, w, na] = generate_uv_coverage(frequency, T, hrs, cov_type, use_ROP, varargin)
 
     % Generate uv coverage for a given array configuration.
     %
@@ -14,7 +14,6 @@ function [u, v, w, na, antennas] = generate_uv_coverage(frequency, T, hrs, cov_t
     %     v_ab: V coordinates. (na^2, T)
     %     w_ab: W coordinates. (na^2, T)
     %     na: Number of antennas.
-    %     antennas: Antenna indices.
     
     % ----------------------------------------------------- %
     switch cov_type
@@ -87,14 +86,6 @@ function [u, v, w, na, antennas] = generate_uv_coverage(frequency, T, hrs, cov_t
         u_ab = u_ab - permute(u_ab, [1, 3, 2]);
         v_ab = v_ab - permute(v_ab, [1, 3, 2]);
         w_ab = w_ab - permute(w_ab, [1, 3, 2]);
-    else
-        % generate corresponding antenna indices (couple)
-        Ant_T = zeros(na^2, 2);
-        for a = 1:na
-            Ant_T((a - 1) * na - (a - 1) * a / 2 + 1:a * na - a * (a + 1) / 2, 1) = a * ones(na - a, 1); % antenna alpha
-            Ant_T((a - 1) * na - (a - 1) * a / 2 + 1:a * na - a * (a + 1) / 2, 2) = (a + 1:na).';        % antenna beta
-        end
-        antennas = repmat(Ant_T, [T, 1]); % see if couples (beta, alpha are necessary)
     end
     
     % vectorize
@@ -104,9 +95,9 @@ function [u, v, w, na, antennas] = generate_uv_coverage(frequency, T, hrs, cov_t
 
     % convert uvw in units of the wavelength
     speedOfLight = 299792458;
-    u = 0
-    v = 0
-    w = 0
+    u = u_ab ./ (speedOfLight/frequency) ;
+    v = v_ab ./ (speedOfLight/frequency) ;
+    w = w_ab ./ (speedOfLight/frequency) ;
         
     end
     
