@@ -26,18 +26,9 @@ frequency  = 1e9;
 % data weighting enabled (for imaging e.g. Briggs) 
 weighting_on = false; 
 % ROP parameters
-Npb = 500; % number of projections per time instant
-ROP_type = 'batch'; % rank-one projected data. ['none', 'separated', 'batch']
+Npb = 200; % number of projections per time instant
+ROP_type = 'dependent'; % rank-one projected data. ['none', 'separated', 'batch', 'dependent']
 rvtype = 'unitary'; % or 'gaussian
-
-%% flag for using ROPs
-if strcmp(ROP_type, 'separated') || strcmp(ROP_type, 'batch')
-    use_ROP = true;
-elseif strcmp(ROP_type, 'none')
-    use_ROP = false;
-else
-    error('ROP_type not recognized')
-end
 
 %% ground truth image 
 fprintf("\nread ground truth image  .. ")
@@ -47,32 +38,28 @@ gdthim = imread('ngc6543a.jpg') ;
 gdthim = double(gdthim(49:560, 27:538)); 
 % normalize image (peak = 1)
 gdthim = gdthim./max(gdthim,[],'all'); 
-% characteristics
-imSize = size(gdthim);
-% display
+
+imSize = size(gdthim); % characteristics
+
 figure(1), imagesc(gdthim), colorbar, title ('ground truth image'), axis image,  axis off,
 
 %% data noise settings
+noise_param = struct();
+noise_param.noiselevel = noiselevel;
 switch noiselevel
     case 'drheuristic'
         % dynamic range of the ground truth image
-        targetDynamicRange = 255; 
+        noise_param.targetDynamicRange = 255; 
     case 'inputsnr'
          % user-specified input signal to noise ratio
-        isnr = 40; % in dB
+        noise_param.isnr = 40; % in dB
 end
 
 % generate sampling pattern (uv-coverage)
 fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
-[umeter, vmeter, wmeter, na] = generate_uv_coverage(nTimeSamples, obsTime, telescope, use_ROP);
+[u, v, w, na] = generate_uv_coverage(frequency, nTimeSamples, obsTime, telescope, use_ROP);
 
-% figure(); plot(umeter, vmeter, 'o'); title('uv-coverage'); axis equal; grid on;
-
-% convert uvw in units of the wavelength
-speedOfLight = 299792458;
-u = umeter ./ (speedOfLight/frequency) ;
-v = vmeter ./ (speedOfLight/frequency) ;
-w = wmeter ./ (speedOfLight/frequency) ;
+% figure(); plot(u, v, 'o'); title('uv-coverage'); axis equal; grid on;
 
 % maximum projected baseline (just for info)
 maxProjBaseline  = sqrt(max(u.^2+v.^2));
@@ -83,11 +70,7 @@ resolution_param.superresolution = superresolution;
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
 % ROP parameters
-ROP_param = struct();
-if use_ROP
-    % generate the random realizations.
-    ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type);
-end
+ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type);
 
 % measurement operator
 [measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_param);
@@ -108,52 +91,12 @@ end
 fprintf("\nsimulate model measurements .. ")
 meas = measop(gdthim);
 
-%number of data points
-nmeas = numel(meas);
+nmeas = numel(meas); %number of data points
 
 %% model data
 
 % noise vector
-switch noiselevel
-    case 'drheuristic'
-        fprintf("\ngenerate noise (noise level commensurate of the target dynamic range) .. ")
-       
-        if weighting_on 
-            % include weights in the measurement op.
-            measop_1 = @(x) (nWimag.*measop(x));
-            adjoint_measop_1 = @(x) (adjoint_measop(nWimag.*x));
-            measopSpectralNorm_1 = op_norm(measop_1, @(y) real(adjoint_measop_1(y)), imSize, 10^-4, 500, 0);
-
-            measop_2 = @(x) ((nWimag.^2) .* measop(x));
-            adjoint_measop_2 = @(x) (adjoint_measop((nWimag.^2).*x));
-            measopSpectralNorm_2 = op_norm(measop_2, @(y) real(adjoint_measop_2(y)), imSize, 10^-4, 500, 0);
-
-            % correction factor
-            eta_correction = sqrt(measopSpectralNorm_2/measopSpectralNorm_1);
-
-            % noise standard deviation heuristic
-            tau  = sqrt(2 * measopSpectralNorm_1) / targetDynamicRange /eta_correction;
-        else
-            % compute measop spectral norm to infer the noise heuristic
-            measopSpectralNorm = op_norm(measop, @(y) real(adjoint_measop(y)), imSize, 10^-4, 500, 0);
-            eta_correction = 1;
-            % noise standard deviation heuristic
-            tau  = sqrt(2 * measopSpectralNorm) / targetDynamicRange ;
-        end
-        
-        % noise realization(mean-0; std-tau)
-        noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
-
-        % input signal to noise ratio
-        isnr = 20 *log10 (norm(meas)./norm(noise));
-        fprintf("\ninfo: random Gaussian noise with input SNR: %.3f db", isnr)
-
-    case 'inputsnr'
-        fprintf("\ngenerate noise from input SNR  .. ")
-        % user-specified input signal to noise ratio
-        tau = norm(meas) / (10^(isnr/20)) /sqrt( (nmeas + 2*sqrt(nmeas)));
-        noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
-end
+[tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, weighting_on, noise_param);
 
 % data
 fprintf("\nsimulate noisy data  .. ")
@@ -162,7 +105,8 @@ y = meas + noise;
 %% back-projected data
 fprintf("\nget (non-normalised) back-projected data  .. ")
 if weighting_on
-    dirty = real( adjoint_measop((nWimag.^2).*y) );
+    y_weighted = (nWimag.^2).*y; 
+    dirty = real( adjoint_measop(y_weighted) );
     dirty = reshape(dirty, imSize);
     figure(2), imagesc(dirty), colorbar, title ('dirty image (weights applied)'), axis image,   axis off,
 else

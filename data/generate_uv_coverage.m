@@ -1,4 +1,4 @@
-function [u_ab, v_ab, w_ab, na, antennas] = generate_uv_coverage(T, hrs, cov_type, use_ROP, varargin)
+function [u, v, w, na, antennas] = generate_uv_coverage(frequency, T, hrs, cov_type, use_ROP, varargin)
 
     % Generate uv coverage for a given array configuration.
     %
@@ -101,6 +101,12 @@ function [u_ab, v_ab, w_ab, na, antennas] = generate_uv_coverage(T, hrs, cov_typ
     u_ab = u_ab(:);
     v_ab = v_ab(:);
     w_ab = w_ab(:);
+
+    % convert uvw in units of the wavelength
+    speedOfLight = 299792458;
+    u = u_ab ./ (speedOfLight/frequency) ;
+    v = v_ab ./ (speedOfLight/frequency) ;
+    w = w_ab ./ (speedOfLight/frequency) ;
         
     end
     
