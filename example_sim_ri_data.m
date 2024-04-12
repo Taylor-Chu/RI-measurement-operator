@@ -134,7 +134,7 @@ end
 fprintf("\nget (non-normalised) back-projected data  .. ")
 title_ = 'dirty image';
 if weighting_on
-    dirty = real( adjoint_measop((nWimag.^2).*y) );
+    dirty = real( adjoint_measop(nWimag.*y) );
     title_ = [title_ , ' (weights applied)'];
 else
     dirty = real( adjoint_raw_measop(y) );
