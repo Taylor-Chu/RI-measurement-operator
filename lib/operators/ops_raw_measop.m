@@ -131,10 +131,10 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(uv_param, imsize, 
         [D, Dt] = op_ROP(ROP_param);
     
         measop = @(x) ( D(G * Ft(x)) ) ; 
-        adjoint_measop = @(y) IFt( G' * Dt(y) );
+        adjoint_measop = @(y) real(IFt( G' * Dt(y) ));
     else
         measop = @(x) ( G * Ft(x) ) ; 
-        adjoint_measop = @(y) IFt( G' * y );
+        adjoint_measop = @(y) real(IFt( G' * y ));
     end
     
     %% additional output
