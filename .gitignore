@@ -3,5 +3,7 @@
 *.pyc
 venv/
 results/
+*.ipynb
+*.mat
 
 *./__pycache__/
