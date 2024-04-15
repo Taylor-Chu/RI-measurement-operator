@@ -39,7 +39,7 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(uv_param, imsize, 
     %    normalization factor in RI: peak of the PSF.
     % varargout : cell
     %    `` varargout{1}``: G matrix. `` varargout{2}``: grid-correction image
-    
+
     %% [hardcoded] NUFFT parameters
     if nargin < 7
         nufft_param.N = imsize; % image size
@@ -49,17 +49,6 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(uv_param, imsize, 
         nufft_param.ktype = 'minmax:kb'; % kernel type
     end
     
-    % Check if ROP should be applied
-    if nargin < 6
-        use_ROP = false;
-    else
-        if isfield(ROP_param, 'alpha')
-            use_ROP = true;
-        else 
-            use_ROP = false;
-        end
-    end
-
     %% extract the coordinates
     u = uv_param.u;
     v = uv_param.v;
@@ -74,7 +63,7 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(uv_param, imsize, 
     v = v ./ (speedOfLight/frequency) ;
     w = w ./ (speedOfLight/frequency) ;
 
-    if use_ROP
+    if ROP_param.use_ROP
         u = u(:);
         v = v(:);
         w = w(:);
@@ -126,7 +115,7 @@ function [measop, adjoint_measop, varargout] = ops_raw_measop(uv_param, imsize, 
     end
     
     %% define the measurememt operator & its adjoint
-    if use_ROP
+    if ROP_param.use_ROP
         %% compute ROP operator
         [D, Dt] = op_ROP(ROP_param);
     

@@ -16,6 +16,7 @@ function ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type)
     end
 
     ROP_param = struct();
+    ROP_param.use_ROP = use_ROP;
 
     if use_ROP
         if strcmp(rvtype,'gaussian')
