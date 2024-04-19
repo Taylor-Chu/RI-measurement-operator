@@ -25,8 +25,9 @@ obsTime = 4;
 frequency  = 1e9;
 % ROP parameters
 use_ROP = true; % use rank-one projections
-Npb = 200; % number of projections per time instant
-ROP_type = 'dependent'; % rank-one projected data. ['none', 'separated', 'batch', 'dependent']
+Npb = 500; % number of projections per time instant
+Nm = 100; % number of modulations
+ROP_type = 'modul'; % rank-one projected data. ['none', 'dependent', 'separated', 'batch', 'modul']
 rvtype = 'unitary'; % or 'gaussian
 
 %% ground truth image 
@@ -41,6 +42,17 @@ gdthim = gdthim./max(gdthim,[],'all');
 imSize = size(gdthim); % characteristics
 
 figure(1), imagesc(gdthim), colorbar, title ('ground truth image'), axis image,  axis off,
+
+%% uv-coverage data
+uv_param = struct();
+uv_param.u = u;
+uv_param.v = v;
+uv_param.w = w;
+uv_param.na = na;
+uv_param.nTimeSamples = nTimeSamples;
+
+%% Set ROP parameters
+ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm);
 
 %% data noise settings
 noise_param = struct();
@@ -68,11 +80,8 @@ fprintf("\nbuild NUFFT measurement operator .. ")
 resolution_param.superresolution = superresolution; 
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
-% ROP parameters
-ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type);
-
 % measurement operator
-[measop, adjoint_measop] = ops_raw_measop(u,v,w, imSize, resolution_param, ROP_param);
+[measop, adjoint_measop] = ops_raw_measop(uv_param, imSize, resolution_param, ROP_param);
  
 % %% perform the adjoint test
 % measop_vec = @(x) ( measop(reshape(x, imSize)) ); 

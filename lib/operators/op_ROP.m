@@ -33,6 +33,10 @@ function [D,Dt] = op_ROP(ROP_param)
     elseif strcmp(type, 'dependent')
         D = @(x) dep_ROP(alpha, x, beta);
         Dt = @(y) dep_ROPt(alpha, y, beta);
+    elseif strcmp(type, 'modul')
+        Gamma = ROP_param.Gamma;
+        D = @(x) modul_ROP(alpha, x, beta, Gamma);
+        Dt = @(y) modul_ROPt(alpha, y, beta, Gamma);
     else
         error('Unknown ROP type');
     end
