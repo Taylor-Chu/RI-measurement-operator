@@ -43,6 +43,12 @@ imSize = size(gdthim); % characteristics
 
 figure(1), imagesc(gdthim), colorbar, title ('ground truth image'), axis image,  axis off,
 
+% generate sampling pattern (uv-coverage)
+fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
+[u, v, w, na] = generate_uv_coverage(frequency, nTimeSamples, obsTime, telescope, use_ROP);
+
+% figure(); plot(u, v, 'o'); title('uv-coverage'); axis equal; grid on;
+
 %% uv-coverage data
 uv_param = struct();
 uv_param.u = u;
@@ -65,12 +71,6 @@ switch noiselevel
          % user-specified input signal to noise ratio
         noise_param.isnr = 40; % in dB
 end
-
-% generate sampling pattern (uv-coverage)
-fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
-[u, v, w, na] = generate_uv_coverage(frequency, nTimeSamples, obsTime, telescope, use_ROP);
-
-% figure(); plot(u, v, 'o'); title('uv-coverage'); axis equal; grid on;
 
 % maximum projected baseline (just for info)
 maxProjBaseline  = sqrt(max(u.^2+v.^2));
