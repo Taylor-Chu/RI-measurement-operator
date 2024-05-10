@@ -6,7 +6,7 @@ function u2 = util_keep_upper_triangular(u,na,T)
     %  na: number of antennas
     %  T: number of time steps
 
-    u2 = zeros(na*(na-1)/2,1);
+    u2 = zeros(T*na*(na-1)/2,1);
 
     for t=1:T
         u_t = squeeze(u(t,:,:));
