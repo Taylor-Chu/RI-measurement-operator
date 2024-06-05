@@ -92,6 +92,10 @@ resolution_param.superresolution = superresolution;
 %     measop_shape.out = [Npb*nTimeSamples,1];
 % elseif strcmp(ROP_type, 'batch')
 %     measop_shape.out = [Npb,1];
+% elseif strcmp(ROP_type, 'dependent')
+%     measop_shape.out = [Npb^2*nTimeSamples,1];
+% elseif strcmp(ROP_type, 'modul')
+%     measop_shape.out = [Npb*Nm,1];
 % end
 % adjoint_test(measop_vec, adjoint_measop_vec, measop_shape);
 
