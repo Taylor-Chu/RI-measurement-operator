@@ -38,15 +38,15 @@ fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
 % figure(); plot(u, v, 'o'); title('uv-coverage'); axis equal; grid on;
 
 %% uv-coverage data
-uv_param = struct();
-uv_param.u = u;
-uv_param.v = v;
-uv_param.w = w;
-uv_param.na = na;
-uv_param.nTimeSamples = nTimeSamples;
+param_uv = struct();
+param_uv.u = u;
+param_uv.v = v;
+param_uv.w = w;
+param_uv.na = na;
+param_uv.nTimeSamples = nTimeSamples;
 
 %% Set ROP parameters
-ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm);
+param_ROP = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm);
 
 %% resolution parameters
 resolution_param.superresolution = superresolution; 
@@ -54,7 +54,7 @@ resolution_param.superresolution = superresolution;
 
 % measurement operator
 fprintf("\nbuild NUFFT measurement operator .. ")
-[measop, adjoint_measop] = ops_raw_measop(uv_param, imSize, resolution_param, ROP_param);
+[measop, adjoint_measop] = ops_raw_measop(param_uv, imSize, resolution_param, param_ROP);
 
 % %% perform the adjoint test
 % measop_vec = @(x) ( measop(reshape(x, imSize)) ); 

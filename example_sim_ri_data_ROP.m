@@ -50,26 +50,26 @@ fprintf("\nsimulate Fourier sampling pattern using %s .. ", telescope)
 % figure(); plot(u, v, 'o'); title('uv-coverage'); axis equal; grid on;
 
 %% uv-coverage data
-uv_param = struct();
-uv_param.u = u;
-uv_param.v = v;
-uv_param.w = w;
-uv_param.na = na;
-uv_param.nTimeSamples = nTimeSamples;
+param_uv = struct();
+param_uv.u = u;
+param_uv.v = v;
+param_uv.w = w;
+param_uv.na = na;
+param_uv.nTimeSamples = nTimeSamples;
 
 %% Set ROP parameters
-ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm);
+param_ROP = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm);
 
 %% data noise settings
-noise_param = struct();
-noise_param.noiselevel = noiselevel;
+param_noise = struct();
+param_noise.noiselevel = noiselevel;
 switch noiselevel
     case 'drheuristic'
         % dynamic range of the ground truth image
-        noise_param.targetDynamicRange = 255; 
+        param_noise.targetDynamicRange = 255; 
     case 'inputsnr'
          % user-specified input signal to noise ratio
-        noise_param.isnr = 40; % in dB
+        param_noise.isnr = 40; % in dB
 end
 
 % maximum projected baseline (just for info)
@@ -81,7 +81,7 @@ resolution_param.superresolution = superresolution;
 % resolution_param.pixelSize = nominalPixelSize/superresolution; 
 
 % measurement operator
-[measop, adjoint_measop] = ops_raw_measop(uv_param, imSize, resolution_param, ROP_param);
+[measop, adjoint_measop] = ops_raw_measop(param_uv, imSize, resolution_param, param_ROP);
  
 % %% perform the adjoint test
 % measop_vec = @(x) ( measop(reshape(x, imSize)) ); 
@@ -108,7 +108,7 @@ nmeas = numel(meas); %number of data points
 %% model data
 
 % noise vector
-[tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, noise_param);
+[tau, noise] = util_gen_noise(measop, adjoint_measop, imSize, meas, param_noise);
 
 % data
 fprintf("\nsimulate noisy data  .. ")
@@ -136,7 +136,7 @@ gtfilename = "results/ngc6543a_gt.fits" ;
 
 % save mat file
 nW = tau * ones(na^2*nTimeSamples,1);
-save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "ROP_param", '-v7.3')
+save(matfilename, "y", "nW", "u", "v","w","maxProjBaseline","frequency", "param_ROP", '-v7.3')
 
 % save (non-normalised) dirty image
 fitswrite(dirty, dirtyfilename)

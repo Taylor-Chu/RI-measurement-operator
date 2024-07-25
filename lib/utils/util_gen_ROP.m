@@ -1,4 +1,4 @@
-function ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm)
+function param_ROP = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm)
     % Generate random projection vectors
     % na: number of antennas
     % Npb: number of projections per time instant
@@ -16,8 +16,8 @@ function ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm)
         error('ROP_type not recognized')
     end
 
-    ROP_param = struct();
-    ROP_param.use_ROP = use_ROP;
+    param_ROP = struct();
+    param_ROP.use_ROP = use_ROP;
 
     if use_ROP
         if strcmp(rvtype,'gaussian')
@@ -30,16 +30,16 @@ function ROP_param = util_gen_ROP(na, Npb, nTimeSamples, rvtype, ROP_type, Nm)
             error('Unknown random variable type.');
         end
 
-        ROP_param.alpha = alpha;
-        ROP_param.beta = beta;
-        ROP_param.type = ROP_type;
-        ROP_param.rvtype = rvtype;
+        param_ROP.alpha = alpha;
+        param_ROP.beta = beta;
+        param_ROP.type = ROP_type;
+        param_ROP.rvtype = rvtype;
     end
 
     if strcmp(ROP_type, 'modul')
         Gamma = randsample([-1,1], Nm*nTimeSamples, true);
         Gamma = reshape(Gamma, [Nm,nTimeSamples]);
-        ROP_param.Gamma = Gamma;
+        param_ROP.Gamma = Gamma;
     end
 
 end

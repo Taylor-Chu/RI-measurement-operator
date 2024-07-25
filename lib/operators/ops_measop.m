@@ -1,4 +1,4 @@
-function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weight_param, ROP_param)
+function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weighting_on, param_ROP)
     % Generate the measurement op and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -11,9 +11,9 @@ function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weight_pa
     %     Visibility operator
     % adjoint_vis_op : function handle
     %     Adjoint of the visibility operator
-    % weight_param : struct
+    % weighting_on : bool
     %     Structure containing the parameters for visibility weighting
-    % ROP_param : struct
+    % param_ROP : struct
     %     Structure containing the parameters for applying ROPs on the measurements
     %
     % Returns
@@ -24,18 +24,18 @@ function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weight_pa
     %     Adjoint of the measurement operator
     
     % (optionally) apply visibility weighting
-    if weight_param.weighting_on
+    if weighting_on
         w_vis_op = @(x) W(vis_op(x));
-        adjoint_w_vis_op = @(y) raw_adjoint_measop(Wt(y));
+        adjoint_w_vis_op = @(vis) adjoint_vis_op(Wt(vis));
     else 
         w_vis_op = vis_op;
         adjoint_w_vis_op = adjoint_vis_op;
     end
 
     % (optionally) apply ROPs
-    if ROP_param.use_ROP
+    if param_ROP.use_ROP
         %% compute ROP operator
-        [D, Dt] = op_ROP(ROP_param);
+        [D, Dt] = op_ROP(param_ROP);
     
         measop = @(x) ( D(w_vis_op(x)) ) ; 
         adjoint_measop = @(y) real(adjoint_w_vis_op(Dt(y)));

@@ -49,15 +49,15 @@ imSize = size(gdthim);
 figure(); imagesc(gdthim); colorbar; title('ground truth image'); axis image;  axis off;
 
 %% data noise settings
-noise_param = struct();
-noise_param.noiselevel = noiselevel;
+param_noise = struct();
+param_noise.noiselevel = noiselevel;
 switch noiselevel
     case 'drheuristic'
         % dynamic range of the ground truth image
-        noise_param.targetDynamicRange = 255; 
+        param_noise.targetDynamicRange = 255; 
     case 'inputsnr'
          % user-specified input signal to noise ratio
-        noise_param.isnr = 40; % in dB
+        param_noise.isnr = 40; % in dB
 end
 
 %% Parameters for visibility weighting
@@ -118,7 +118,7 @@ nmeas = numel(vis);
 %% model data
 
 % noise vector
-[tau, noise] = util_gen_noise(raw_measop, adjoint_raw_measop, imSize, vis, noise_param, weight_param);
+[tau, noise] = util_gen_noise(raw_measop, adjoint_raw_measop, imSize, vis, param_noise, weight_param);
 
 % data
 fprintf("\nsimulate data  .. ")

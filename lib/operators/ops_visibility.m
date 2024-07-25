@@ -1,4 +1,4 @@
-function [vis_op, adjoint_vis_op, varargout] = ops_visibility(uv_param, imsize, resolution_param, ROP_param, nufft_param)
+function [vis_op, adjoint_vis_op, varargout] = ops_visibility(param_uv, imsize, resolution_param, param_ROP, nufft_param)
     % Generate the operator computing the visibilities and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -6,7 +6,7 @@ function [vis_op, adjoint_vis_op, varargout] = ops_visibility(uv_param, imsize, 
     %
     % Parameters
     % ----------
-    % uv_param : struct
+    % param_uv : struct
     %     Contains the following fields:
     %     u : double[n,1]
     %         u coordinates of the sampling pattern.
@@ -25,7 +25,7 @@ function [vis_op, adjoint_vis_op, varargout] = ops_visibility(uv_param, imsize, 
     %     size in arcsec ``resolution_param.pixelSize``  or the superresolution
     %     factor ``resolution_param.superresolution``, ideally in the range [1.5, 2.5]. Default:
     %     ``resolution_param.superresolution=1``.
-    % ROP_param : struct
+    % param_ROP : struct
     %     Structure containing the parameters for applying ROPs on the measurements.
     % nufft_param : struct (optional)
     %     Structure containing parameters of NUFFT
@@ -50,11 +50,11 @@ function [vis_op, adjoint_vis_op, varargout] = ops_visibility(uv_param, imsize, 
     end
     
     %% extract the coordinates
-    u = uv_param.u;
-    v = uv_param.v;
-    w = uv_param.w;
-    na = uv_param.na;
-    T = uv_param.nTimeSamples;
+    u = param_uv.u;
+    v = param_uv.v;
+    w = param_uv.w;
+    na = param_uv.na;
+    T = param_uv.nTimeSamples;
 
     %% normalize the coordinates
     speedOfLight = 299792458;
@@ -63,7 +63,7 @@ function [vis_op, adjoint_vis_op, varargout] = ops_visibility(uv_param, imsize, 
     v = v ./ (speedOfLight/frequency) ;
     w = w ./ (speedOfLight/frequency) ;
 
-    if ROP_param.use_ROP
+    if param_ROP.use_ROP
         u = u(:);
         v = v(:);
         w = w(:);
