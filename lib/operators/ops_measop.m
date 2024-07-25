@@ -1,4 +1,4 @@
-function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weighting_on, param_ROP)
+function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weighting_on, tau, param_ROP)
     % Generate the measurement op and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -13,6 +13,8 @@ function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weighting
     %     Adjoint of the visibility operator
     % weighting_on : bool
     %     Structure containing the parameters for visibility weighting
+    % tau : float
+    %     Noise level
     % param_ROP : struct
     %     Structure containing the parameters for applying ROPs on the measurements
     %
@@ -25,6 +27,10 @@ function [measop, adjoint_measop] = ops_measop(vis_op, adjoint_vis_op, weighting
     
     % (optionally) apply visibility weighting
     if weighting_on
+        % nW = (1 / tau) * ones(na^2*nTimeSamples,1);
+        nW = (1 / tau) * nWimag;
+        [W, ~] = op_vis_weighting(nW);
+
         w_vis_op = @(x) W(vis_op(x));
         adjoint_w_vis_op = @(vis) adjoint_vis_op(Wt(vis));
     else 

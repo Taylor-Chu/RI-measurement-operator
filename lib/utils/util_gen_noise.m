@@ -1,12 +1,15 @@
-function [tau, noise, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, meas, noise_level, nWimag)
+function [tau, noise, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, meas, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
     % generate noise realization for the measurements.
     %
     % args:
     %   vis_op: operator computing the visibilities
     %   adjoint_vis_op: adjoint of the visibility operator
     %   meas: measurements
-    %   noise_level: noise level specification
+    %   noiselevel: noise level specification
     %   nWimag: visibility weights
+    %   param_general: general parameters
+    %   path_uv_data: path to the uv data
+    %   gdth_img: ground truth image
 
     nmeas = numel(meas);
 
