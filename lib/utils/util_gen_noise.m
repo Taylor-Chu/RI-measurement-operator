@@ -1,4 +1,4 @@
-function [tau, noise, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, meas, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
+function [tau, noise, gdth_img, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, meas, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
     % generate noise realization for the measurements.
     %
     % args:
