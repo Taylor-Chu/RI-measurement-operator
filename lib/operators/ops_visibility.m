@@ -1,4 +1,4 @@
-function [vis_op, adjoint_vis_op, varargout] = ops_visibility(param_uv, imsize, resolution_param, param_ROP, nufft_param)
+function [vis_op, adjoint_vis_op, param_uv, varargout] = ops_visibility(param_uv, imsize, resolution_param, param_ROP, nufft_param)
     % Generate the operator computing the visibilities and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -73,6 +73,10 @@ function [vis_op, adjoint_vis_op, varargout] = ops_visibility(param_uv, imsize, 
         v = util_keep_upper_triangular(v,na,T);
         w = util_keep_upper_triangular(w,na,T);
     end
+
+    param_uv.u = u;
+    param_uv.v = v;
+    param_uv.w = w;
     
     %%  pixel resolution
     % compute maximum projected baseline (nominal resolution)
@@ -101,6 +105,7 @@ function [vis_op, adjoint_vis_op, varargout] = ops_visibility(param_uv, imsize, 
     
     %% define imaging spatial Fourier bandwidth
     imagingBandwidth = maxProjBaseline * superresolution;
+    param_uv.imagingBandwidth = imagingBandwidth;
     
     %% compute G matrix, associated scale parameter (gridding correction function), & Fourier operators
     [Ft, IFt, G, scale] = op_nufft([-v, u].*(pi/imagingBandwidth), nufft_param.N, nufft_param.J, nufft_param.K, nufft_param.nshift);
@@ -119,9 +124,9 @@ function [vis_op, adjoint_vis_op, varargout] = ops_visibility(param_uv, imsize, 
     adjoint_vis_op = @(y) real(IFt( G' * y ));
     
     %% additional output
-    if nargout == 3
+    if nargout == 5
         varargout{1} = {G};
-    elseif nargout == 4
+    elseif nargout == 6
         varargout{1} = {G};
         varargout{2} = {scale};
     end

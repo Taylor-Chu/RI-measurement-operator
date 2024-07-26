@@ -1,17 +1,17 @@
-function [tau, noise, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, meas, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
-    % generate noise realization for the measurements.
+function [tau, noise, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, vis, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
+    % generate noise realization for the visibilities.
     %
     % args:
     %   vis_op: operator computing the visibilities
     %   adjoint_vis_op: adjoint of the visibility operator
-    %   meas: measurements
+    %   vis: visibilities
     %   noiselevel: noise level specification
     %   nWimag: visibility weights
     %   param_general: general parameters
     %   path_uv_data: path to the uv data
     %   gdth_img: ground truth image
 
-    nmeas = numel(meas);
+    nvis = numel(vis);
 
     %% data noise settings
     param_noise = struct();
@@ -55,10 +55,10 @@ function [tau, noise, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSi
             tau  = sqrt(2 * measopSpectralNorm_1) / targetDynamicRange /eta_correction;
             
             % noise realization(mean-0; std-tau)
-            noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
+            noise = tau * (randn(nvis,1) + 1i * randn(nvis,1))./sqrt(2);
 
             % input signal to noise ratio
-            isnr = 20 *log10 (norm(meas)./norm(noise));
+            isnr = 20 *log10 (norm(vis)./norm(noise));
             fprintf("\ninfo: random Gaussian noise with input SNR: %.3f db", isnr)
 
         case 'inputsnr'
@@ -69,8 +69,8 @@ function [tau, noise, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSi
             isnr = param_noise.isnr; 
 
             % user-specified input signal to noise ratio
-            tau = norm(meas) / (10^(isnr/20)) /sqrt( (nmeas + 2*sqrt(nmeas)));
-            noise = tau * (randn(nmeas,1) + 1i * randn(nmeas,1))./sqrt(2);
+            tau = norm(vis) / (10^(isnr/20)) /sqrt( (nvis + 2*sqrt(nvis)));
+            noise = tau * (randn(nvis,1) + 1i * randn(nvis,1))./sqrt(2);
     end
 
 end
