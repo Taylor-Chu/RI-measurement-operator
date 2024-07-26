@@ -1,41 +1,45 @@
-function [tau, noise, gdth_img, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, meas, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
+function [tau, noise, gdth_img, vis, param_noise] = util_gen_noise(vis_op, adjoint_vis_op, imSize, nvis, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
     % generate noise realization for the measurements.
     %
     % args:
     %   vis_op: operator computing the visibilities
     %   adjoint_vis_op: adjoint of the visibility operator
-    %   vis: visibilities
+    %   nvis: number of visibilities
     %   noiselevel: noise level specification
     %   nWimag: visibility weights
     %   param_general: general parameters
     %   path_uv_data: path to the uv data
     %   gdth_img: ground truth image
 
-    nvis = numel(vis);
-
-    %% data noise settings
     param_noise = struct();
     param_noise.noiselevel = noiselevel;
-    param_noise.expo_gdth = false;
+    param_noise.expo_gdth = true;
+
+    if param_noise.expo_gdth
+        % dynamic range of the ground truth image
+        log_sigma = rand() * (log10(1e-3) - log10(2e-6)) + log10(2e-6);
+        sigma = 10^log_sigma;
+        param_noise.targetDynamicRange = 1/sigma;
+        if param_general.sigma0 > 0
+            % Exponentiation of the ground truth image
+            param_noise.expo_gdth = true;
+            pattern = '(?<=_id_)\d+(?=_dt_)';
+            id = regexp(path_uv_data, pattern, 'match');
+            seed = str2num(id{1});
+            rng(seed, 'twister');
+            expo_factor = util_solve_expo_factor(param_general.sigma0, sigma);
+            fprintf('\nINFO: target dyanmic range set to %g', param_noise.targetDynamicRange);
+            gdth_img = util_expo_im(gdth_img, expo_factor);
+        end
+    end
+
+    %% Generate the noiseless visibilities
+    vis = vis_op(gdth_img);
+
+    %% data noise settings
     switch noiselevel
         case 'drheuristic'
             fprintf("\ngenerate noise (noise level commensurate of the target dynamic range) .. ")
-
-            % dynamic range of the ground truth image
-            log_sigma = rand() * (log10(1e-3) - log10(2e-6)) + log10(2e-6);
-            sigma = 10^log_sigma;
-            param_noise.targetDynamicRange = 1/sigma;
-            if param_general.sigma0 > 0
-                % Exponentiation of the ground truth image
-                param_noise.expo_gdth = true;
-                pattern = '(?<=_id_)\d+(?=_dt_)';
-                id = regexp(path_uv_data, pattern, 'match');
-                seed = str2num(id{1});
-                rng(seed, 'twister');
-                expo_factor = util_solve_expo_factor(param_general.sigma0, sigma);
-                fprintf('\nINFO: target dyanmic range set to %g', param_noise.targetDynamicRange);
-                gdth_img = util_expo_im(gdth_img, expo_factor);
-            end
 
             targetDynamicRange = param_noise.targetDynamicRange;
         
