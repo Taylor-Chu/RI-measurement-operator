@@ -40,19 +40,23 @@ function [param_ROP, param_general] = util_gen_ROP(na, nTimeSamples, param_gener
         param_ROP.type = ROP_type;
         param_ROP.rv_type = rv_type;
 
-        if strcmp(ROP_type, 'separated')
-            param_general.subFolerName = ['separated_ROP', filesep, 'Np_', num2str(Np), param_general.subFolerName]
-        elseif strcmp(ROP_type, 'batch')
-            param_general.subFolerName = ['batch_ROP', filesep, 'Np_', num2str(Np), param_general.subFolerName]
-        elseif strcmp(ROP_type, 'modul')
+        % if strcmp(ROP_type, 'separated')
+            % param_general.subFolerName = ['separated_ROP', filesep, 'Np_', num2str(Np), param_general.subFolerName]
+        % elseif strcmp(ROP_type, 'batch')
+            % param_general.subFolerName = ['batch_ROP', filesep, 'Np_', num2str(Np), param_general.subFolerName]
+        % elseif strcmp(ROP_type, 'modul')
+            % param_general.subFolerName = ['modul_ROP', filesep, 'Np_', num2str(Np), '_Nm_', num2str(Nm), filesep, param_general.subFolerName]
+        % end
+
+        if strcmp(ROP_type, 'modul')
             Gamma = randsample([-1,1], Nm*nTimeSamples, true);
             Gamma = reshape(Gamma, [Nm,nTimeSamples]);
             param_ROP.Gamma = Gamma;
-            param_general.subFolerName = ['modul_ROP', filesep, 'Np_', num2str(Np), '_Nm_', num2str(Nm), filesep, param_general.subFolerName]
         end
 
     else 
-        param_general.subFolerName = ['no_ROP', filesep, param_general.subFolerName]
+        break
+        % param_general.subFolerName = ['no_ROP', filesep, param_general.subFolerName]
     end
 
 end
