@@ -1,4 +1,4 @@
-function [vis_op, adjoint_vis_op, param_uv, varargout] = ops_visibility(param_uv, imsize, resolution_param, param_ROP, nufft_param)
+function [vis_op, adjoint_vis_op, param_uv, G, Ft, IFt] = ops_visibility(param_uv, imsize, resolution_param, param_ROP, nufft_param)
     % Generate the operator computing the visibilities and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -121,14 +121,5 @@ function [vis_op, adjoint_vis_op, param_uv, varargout] = ops_visibility(param_uv
     
     %% define the visibility operator & its adjoint
     vis_op = @(x) ( G * Ft(x) ) ; 
-    adjoint_vis_op = @(y) real(IFt( G' * y ));
-    
-    %% additional output
-    if nargout == 5
-        varargout{1} = {G};
-    elseif nargout == 6
-        varargout{1} = {G};
-        varargout{2} = {scale};
-    end
-    
+    adjoint_vis_op = @(y) real(IFt( G' * y ));    
 end    

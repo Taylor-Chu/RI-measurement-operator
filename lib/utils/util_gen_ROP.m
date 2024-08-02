@@ -23,6 +23,8 @@ function [param_ROP, param_general] = util_gen_ROP(na, nTimeSamples, param_gener
 
     param_ROP = struct();
     param_ROP.use_ROP = use_ROP;
+    param_ROP.Np = Np;
+    param_ROP.Nm = Nm;
 
     if use_ROP
         if strcmp(rv_type,'gaussian')
@@ -41,11 +43,11 @@ function [param_ROP, param_general] = util_gen_ROP(na, nTimeSamples, param_gener
         param_ROP.rv_type = rv_type;
 
         % if strcmp(ROP_type, 'separated')
-            % param_general.subFolerName = ['separated_ROP', filesep, 'Np_', num2str(Np), param_general.subFolerName]
+            % param_general.subFolderName = ['separated_ROP', filesep, 'Np_', num2str(Np), param_general.subFolderName]
         % elseif strcmp(ROP_type, 'batch')
-            % param_general.subFolerName = ['batch_ROP', filesep, 'Np_', num2str(Np), param_general.subFolerName]
+            % param_general.subFolderName = ['batch_ROP', filesep, 'Np_', num2str(Np), param_general.subFolderName]
         % elseif strcmp(ROP_type, 'modul')
-            % param_general.subFolerName = ['modul_ROP', filesep, 'Np_', num2str(Np), '_Nm_', num2str(Nm), filesep, param_general.subFolerName]
+            % param_general.subFolderName = ['modul_ROP', filesep, 'Np_', num2str(Np), '_Nm_', num2str(Nm), filesep, param_general.subFolderName]
         % end
 
         if strcmp(ROP_type, 'modul')
@@ -55,8 +57,7 @@ function [param_ROP, param_general] = util_gen_ROP(na, nTimeSamples, param_gener
         end
 
     else 
-        break
-        % param_general.subFolerName = ['no_ROP', filesep, param_general.subFolerName]
+        % param_general.subFolderName = ['no_ROP', filesep, param_general.subFolderName]
     end
 
 end
