@@ -12,7 +12,7 @@ function [z] = modul_ROP(A,X,B,Gamma)
     [~,m,b] = size(A);
 
     % get the separated ROPs measurements
-    y = sep_ROP(A,X,B); % (m,b)
+    y = sep_ROP(A,X,B); % (m*b,)
     y = reshape(y, [m,b]); % (m,b)
 
     % Modulate along the batches

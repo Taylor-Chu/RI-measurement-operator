@@ -1,4 +1,4 @@
-function [z] = modul_ROP(A,X,B,Gamma)
+function [z] = modul_ROP3(A,X,B,Gamma)
     % Function to compute modulated batched ROPs
     % Args:
     %   A: (n,m,b) array
@@ -13,7 +13,7 @@ function [z] = modul_ROP(A,X,B,Gamma)
     ncol = round(length(X)/(n^2*b));
 
     % get the separated ROPs measurements
-    y = sep_ROP3(A,X,B); % (m,b,ncol)
+    y = sep_ROP3(A,X,B); % (m*b*ncol,)
     y = reshape(y, [m,b,ncol]); % (m,b,ncol)
     y = permute(y, [2,1,3]); % (b,m,ncol)
     y = reshape(y, [b,m*ncol]); % (b,m*ncol)

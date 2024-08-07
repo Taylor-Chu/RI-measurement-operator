@@ -28,10 +28,7 @@ function [tau, noise, gdth_img, vis, param_noise] = util_gen_noise(vis_op, adjoi
             rng(seed, 'twister');
             expo_factor = util_solve_expo_factor(param_general.sigma0, sigma);
             fprintf('\nINFO: target dyanmic range set to %g', param_noise.targetDynamicRange);
-            
-            % % /!\ The provided groundtruths are already exponentiated
-            % gdth_img = util_expo_im(gdth_img, expo_factor);
-            gdth_img = gdth_img;
+            gdth_img = util_expo_im(gdth_img, expo_factor);
         end
     end
 
