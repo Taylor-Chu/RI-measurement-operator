@@ -1,4 +1,4 @@
-function [measop, adjoint_measop] = ops_measop(G, Ft, IFt, param_weighting, tau, param_ROP)
+function [measop, adjoint_measop, y] = ops_measop(vis, G, Ft, IFt, param_weighting, tau, param_ROP)
     % Generate the measurement op and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -29,24 +29,32 @@ function [measop, adjoint_measop] = ops_measop(G, Ft, IFt, param_weighting, tau,
     %     Measurement operator
     % adjoint_measop : function handle
     %     Adjoint of the measurement operator
+    % y : double[:]
+    %     Measurement vector
     
     nWimag = param_weighting.nWimag;
     weighting_on = param_weighting.weighting_on;
 
     % (optionally) apply visibility weighting
     if weighting_on
+        % nW = (1 / tau) * ones(na^2*nTimeSamples,1);
         nW = (1 / tau) * nWimag;
         [W, Wt] = op_vis_weighting(nW);
+        vis = W(vis);
     end
-
+    
     % (optionally) apply ROPs
     if param_ROP.use_ROP
 
         %% compute ROP operator
         [D, Dt] = op_ROP(param_ROP);
 
+        y = D(vis);
+
         % Precompute forward operator
         if strcmp(param_ROP.type, 'modul')
+
+            % [D, ~, M] = op_ROP(param_ROP);
 
             % if weighting_on
             %     preop = @(x) ( D(W(x)) );
@@ -103,9 +111,13 @@ function [measop, adjoint_measop] = ops_measop(G, Ft, IFt, param_weighting, tau,
             % MDG = MDG(:,ind);
             % toc;
 
-            % whos G
             % tic;
-            % MDG = preop(G);
+            % DG = D*G;
+            % toc;
+            % whos DG
+
+            % tic; 
+            % MDG = M * DG;
             % toc;
             % whos MDG
 
@@ -120,6 +132,9 @@ function [measop, adjoint_measop] = ops_measop(G, Ft, IFt, param_weighting, tau,
             % adjoint_measop = @(y) real(IFt(MDG' * y));
             
         else
+            % %% compute ROP operator
+            % [D, Dt] = op_ROP(param_ROP);
+
             if weighting_on
                 measop = @(x) ( D(W(G * Ft(x))) ) ; 
                 adjoint_measop = @(y) real(IFt(G' * Wt(Dt(y))));
@@ -128,6 +143,7 @@ function [measop, adjoint_measop] = ops_measop(G, Ft, IFt, param_weighting, tau,
                 adjoint_measop = @(y) real(IFt(G' * Dt(y)));
             end
         end
+
     else
         if weighting_on
             measop = @(x) ( W(G * Ft(x)) ) ; 
@@ -136,6 +152,8 @@ function [measop, adjoint_measop] = ops_measop(G, Ft, IFt, param_weighting, tau,
             measop = @(x) ( G * Ft(x) ) ; 
             adjoint_measop = @(y) real(IFt(G' * y));
         end
+
+        y = vis;
     end
     
 end    

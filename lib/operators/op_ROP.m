@@ -1,4 +1,4 @@
-function [D,Dt] = op_ROP(param_ROP)
+function [D,Dt, varargout] = op_ROP(param_ROP)
     % Create the operator the applies separated ROPs per batch.
     %
     % Parameters
@@ -11,6 +11,8 @@ function [D,Dt] = op_ROP(param_ROP)
     %       The right side projection vectors.
     %   .type : string
     %       The ROP model. 'separated' or 'batch'.
+    %
+    % varargout : output M if type is 'modul'
     %
     % Returns
     % -------
@@ -27,6 +29,8 @@ function [D,Dt] = op_ROP(param_ROP)
     if strcmp(type, 'separated')    
         D = @(x) sep_ROP2(alpha, x, beta);
         Dt = @(y) sep_ROPt(alpha, y, beta);
+        % D = sep_ROP_sparse_mat(alpha, beta);
+        % Dt = D'; 
     elseif strcmp(type, 'batch')
         D = @(x) batch_ROP2(alpha, x, beta);
         Dt = @(y) batch_ROPt(alpha, y, beta);
@@ -37,9 +41,12 @@ function [D,Dt] = op_ROP(param_ROP)
         Gamma = param_ROP.Gamma;
         D = @(x) modul_ROP(alpha, x, beta, Gamma);
         Dt = @(y) modul_ROPt(alpha, y, beta, Gamma);
+        % D = sep_ROP_sparse_mat(alpha, beta);
+        % Dt = D';
+        % M = modul_ROP_sparse_mat(Gamma, size(alpha,2));
+        % varargout{1} = M;
     else
         error('Unknown ROP type');
     end
-
 end
     
