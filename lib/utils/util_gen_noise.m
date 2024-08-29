@@ -16,16 +16,17 @@ function [tau, noise, gdth_img, vis, param_noise] = util_gen_noise(vis_op, adjoi
     param_noise.expo_gdth = true;
 
     if param_noise.expo_gdth
+        pattern = '(?<=_id_)\d+(?=_dt_)';
+        id = regexp(path_uv_data, pattern, 'match');
+        seed = str2num(id{1});
+        rng(seed, 'twister');
+
         % dynamic range of the ground truth image
         log_sigma = rand() * (log10(1e-3) - log10(2e-6)) + log10(2e-6);
         sigma = 10^log_sigma;
         param_noise.targetDynamicRange = 1/sigma;
         if param_general.sigma0 > 0
             % Exponentiation of the ground truth image
-            pattern = '(?<=_id_)\d+(?=_dt_)';
-            id = regexp(path_uv_data, pattern, 'match');
-            seed = str2num(id{1});
-            rng(seed, 'twister');
             expo_factor = util_solve_expo_factor(param_general.sigma0, sigma);
             fprintf('\nINFO: target dyanmic range set to %g', param_noise.targetDynamicRange);
             gdth_img = util_expo_im(gdth_img, expo_factor);
@@ -41,21 +42,28 @@ function [tau, noise, gdth_img, vis, param_noise] = util_gen_noise(vis_op, adjoi
             fprintf("\ngenerate noise (noise level commensurate of the target dynamic range) .. ")
 
             targetDynamicRange = param_noise.targetDynamicRange;
-        
+
+            measop_0 = @(x) (vis_op(x));
+            adjoint_measop_0 = @(x) (adjoint_vis_op(x));
+            measopSpectralNorm_0 = op_norm(measop_0, @(y) real(adjoint_measop_0(y)), imSize, 10^-4, 500, 0);
+            tau_0 = sqrt(2 * measopSpectralNorm_0) / targetDynamicRange;
+ 
+            nW = 1/tau_0;
+
             % include weights in the measurement op.
-            measop_1 = @(x) (nWimag.*vis_op(x));
-            adjoint_measop_1 = @(x) (adjoint_vis_op(nWimag.*x));
+            measop_1 = @(x) (nW * nWimag.*vis_op(x));
+            adjoint_measop_1 = @(x) (adjoint_vis_op(nW * nWimag.*x));
             measopSpectralNorm_1 = op_norm(measop_1, @(y) real(adjoint_measop_1(y)), imSize, 10^-4, 500, 0);
 
-            measop_2 = @(x) ((nWimag.^2) .* vis_op(x));
-            adjoint_measop_2 = @(x) (adjoint_vis_op((nWimag.^2).*x));
+            measop_2 = @(x) ((nW * nWimag.^2) .* vis_op(x));
+            adjoint_measop_2 = @(x) (adjoint_vis_op((nW * nWimag.^2).*x));
             measopSpectralNorm_2 = op_norm(measop_2, @(y) real(adjoint_measop_2(y)), imSize, 10^-4, 500, 0);
 
             % correction factor (=1 if no weights)
             eta_correction = sqrt(measopSpectralNorm_2/measopSpectralNorm_1);
 
             % noise standard deviation heuristic
-            tau  = sqrt(2 * measopSpectralNorm_1) / targetDynamicRange /eta_correction;
+            tau  = tau_0 * sqrt(2 * measopSpectralNorm_1) / targetDynamicRange /eta_correction;
             
             % noise realization(mean-0; std-tau)
             noise = tau * (randn(nvis,1) + 1i * randn(nvis,1))./sqrt(2);
