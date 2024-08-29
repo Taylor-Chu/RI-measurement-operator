@@ -71,7 +71,8 @@ function [vis_op, adjoint_vis_op, param_uv, G, Ft, IFt] = ops_visibility(param_u
         % keep only the upper triangular part of the matrices
         u = util_keep_upper_triangular(u,na,T);
         v = util_keep_upper_triangular(v,na,T);
-        w = util_keep_upper_triangular(w,na,T);
+        % w = util_keep_upper_triangular(w,na,T);
+        w = zeros('like', u);
     end
 
     param_uv.u = u;

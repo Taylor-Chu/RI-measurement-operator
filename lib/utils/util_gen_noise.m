@@ -22,12 +22,17 @@ function [tau, noise, gdth_img, vis, param_noise] = util_gen_noise(vis_op, adjoi
         rng(seed, 'twister');
 
         % dynamic range of the ground truth image
+        pattern = '(?<=uv_)\d+';
+        id = regexp(path_uv_data, pattern, 'match');
+        seed = str2num(id{1});
+        rng(seed, 'twister');
         log_sigma = rand() * (log10(1e-3) - log10(2e-6)) + log10(2e-6);
         sigma = 10^log_sigma;
         param_noise.targetDynamicRange = 1/sigma;
         if param_general.sigma0 > 0
             % Exponentiation of the ground truth image
             expo_factor = util_solve_expo_factor(param_general.sigma0, sigma);
+            fprintf('\nINFO: exponentiation factor: %g', expo_factor);
             fprintf('\nINFO: target dyanmic range set to %g', param_noise.targetDynamicRange);
             gdth_img = util_expo_im(gdth_img, expo_factor);
         end
