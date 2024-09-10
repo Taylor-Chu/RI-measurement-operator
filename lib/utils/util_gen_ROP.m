@@ -11,6 +11,7 @@ function [param_ROP, param_general] = util_gen_ROP(na, nTimeSamples, param_gener
     rv_type = param_general.rv_type;
     ROP_type = param_general.ROP_type;
     Nm = param_general.Nm;
+    precompute = param_general.precompute;
 
     % flags for using ROPs
     if strcmp(ROP_type, 'separated') || strcmp(ROP_type, 'batch') || strcmp(ROP_type, 'dependent') || strcmp(ROP_type, 'modul')
@@ -25,6 +26,7 @@ function [param_ROP, param_general] = util_gen_ROP(na, nTimeSamples, param_gener
     param_ROP.use_ROP = use_ROP;
     param_ROP.Np = Np;
     param_ROP.Nm = Nm;
+    param_ROP.precompute = precompute;
 
     if use_ROP
         if strcmp(rv_type,'gaussian')

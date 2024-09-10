@@ -16,11 +16,6 @@ function [tau, noise, gdth_img, vis, param_noise] = util_gen_noise(vis_op, adjoi
     param_noise.expo_gdth = true;
 
     if param_noise.expo_gdth
-        pattern = '(?<=_id_)\d+(?=_dt_)';
-        id = regexp(path_uv_data, pattern, 'match');
-        seed = str2num(id{1});
-        rng(seed, 'twister');
-
         % dynamic range of the ground truth image
         pattern = '(?<=uv_)\d+';
         id = regexp(path_uv_data, pattern, 'match');
