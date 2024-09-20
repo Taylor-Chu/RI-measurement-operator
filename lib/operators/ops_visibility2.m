@@ -1,4 +1,4 @@
-function [vis_op, adjoint_vis_op, param_uv, G, Ft, IFt] = ops_visibility(param_uv, imsize, resolution_param, param_ROP, nufft_param)
+function [vis_op, adjoint_vis_op, param_uv, G, Ft, IFt] = ops_visibility2(param_uv, imsize, resolution_param, param_ROP, nufft_param)
     % Generate the operator computing the visibilities and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with

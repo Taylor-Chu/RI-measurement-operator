@@ -27,6 +27,8 @@ function param_weighting = util_gen_imaging_weights(param_uv, N, param_weighting
 
     if param_weighting.weighting_on
 
+        % print('\nGenerating imaging weights...');
+        fprintf('\nWeighting type: %s', param_weighting.weight_type);
         if ~isfield(param_weighting, 'weight_type')
             param_weighting.weight_type = 'uniform';
         end

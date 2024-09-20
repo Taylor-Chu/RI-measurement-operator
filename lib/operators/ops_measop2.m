@@ -1,4 +1,4 @@
-function [measop, adjoint_measop, y] = ops_measop(vis, G, Ft, IFt, param_weighting, tau, param_ROP)
+function [measop, adjoint_measop] = ops_measop2(G, Ft, IFt, nW, param_ROP)
     % Generate the measurement op and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -32,22 +32,22 @@ function [measop, adjoint_measop, y] = ops_measop(vis, G, Ft, IFt, param_weighti
     % y : double[:]
     %     Measurement vector
     
-    nWimag = param_weighting.nWimag;
-    weighting_on = param_weighting.weighting_on;
+    % nWimag = param_weighting.nWimag;
+    % weighting_on = param_weighting.weighting_on;
     precompute = param_ROP.precompute;
 
     % (optionally) apply visibility weighting
-    if weighting_on
-        % nW = (1 / tau) * ones(na^2*nTimeSamples,1);
-        nW = (1 / tau) * nWimag;
-        vis = nW.*vis;
+    % if weighting_on
+    %     % nW = (1 / tau) * ones(na^2*nTimeSamples,1);
+    %     nW = (1 / tau) * nWimag;
+    %     vis = nW.*vis;
 
-        % Integrate the weighting into the interpolation matrix G.
-        G = nW .* G;
-    end
+    %     % Integrate the weighting into the interpolation matrix G.
+    %     G = nW .* G;
+    % end
 
-    measop = @(x) ( G * Ft(x) ) ; 
-    adjoint_measop = @(y) real(IFt(G' * y));
+    measop = @(x) ( nW .* G * Ft(x) ) ; 
+    adjoint_measop = @(y) real(IFt( (nW .* G)' * y));
     
     % (optionally) apply ROPs
     if param_ROP.use_ROP
@@ -56,7 +56,7 @@ function [measop, adjoint_measop, y] = ops_measop(vis, G, Ft, IFt, param_weighti
 
         measop = @(x) ( D(measop(x)) );
         adjoint_measop = @(y) adjoint_measop(Dt(y));
-        y = D(vis);
+        % y = D(vis);
 
         % Precompute forward operator
         if strcmp(param_ROP.type, 'modul')
@@ -69,8 +69,8 @@ function [measop, adjoint_measop, y] = ops_measop(vis, G, Ft, IFt, param_weighti
             end
 
         end
-    else
-        y = vis;
+    % else
+    %     y = vis;
     end
     
 end    
