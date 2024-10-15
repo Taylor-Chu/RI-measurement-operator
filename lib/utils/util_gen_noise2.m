@@ -1,4 +1,4 @@
-function [tau, noise, gdth_img, param_noise, vis] = util_gen_noise2(measop, adjoint_measop, imSize, noiselevel, nWimag, param_general, path_uv_data, gdth_img)
+function [tau, noise, gdth_img, param_noise, vis] = util_gen_noise2(measop, adjoint_measop, imSize, noiselevel, nWimag, param_general, path_uv_data, gdth_img, G, Ft, IFt, param_ROP)
     % generate noise realization for the measurements.
     %
     % args:
@@ -53,12 +53,14 @@ function [tau, noise, gdth_img, param_noise, vis] = util_gen_noise2(measop, adjo
             nW = 1/tau_0;
 
             % include weights in the measurement op.
-            measop_1 = @(x) (measop(x));
-            adjoint_measop_1 = @(x) (adjoint_measop(x));
+            [measop_1_, adjoint_measop_1_] = ops_measop2(G, Ft, IFt, nW.*nWimag, param_ROP);
+            measop_1 = @(x) (measop_1_(x));
+            adjoint_measop_1 = @(x) (adjoint_measop_1_(x));
             measopSpectralNorm_1 = op_norm(measop_1, @(y) real(adjoint_measop_1(y)), imSize, 10^-4, 500, 0);
 
-            measop_2 = @(x) (measop(x));
-            adjoint_measop_2 = @(x) (adjoint_measop(x));
+            [measop_2_, adjoint_measop_2_] = ops_measop2(G, Ft, IFt, nW.*(nWimag.^2), param_ROP);
+            measop_2 = @(x) (measop_2_(x));
+            adjoint_measop_2 = @(x) (adjoint_measop_2_(x));
             measopSpectralNorm_2 = op_norm(measop_2, @(y) real(adjoint_measop_2(y)), imSize, 10^-4, 500, 0);
 
             % correction factor (=1 if no weights)

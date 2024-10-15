@@ -63,14 +63,47 @@ function [vis_op, adjoint_vis_op, param_uv, G, Ft, IFt] = ops_visibility(param_u
     v = v ./ (speedOfLight/frequency) ;
     w = w ./ (speedOfLight/frequency) ;
 
-    if param_ROP.use_ROP
+    if param_ROP.use_ROP | param_uv.use_BDA
         u = u(:);
         v = v(:);
         w = w(:);
     else 
         % keep only the upper triangular part of the matrices
+        % NpNm = param_ROP.Np * param_ROP.Nm;
+        % if NpNm == 1000
+        %     t = 1
+        %     split_values = round(linspace(0, single(T), single(t+2)));
+        %     split_values = split_values(2);
+        % elseif NpNm == 4000
+        %     t = 2
+        %     split_values = round(linspace(0, single(T), single(t+2)));
+        %     split_values = split_values(2:3);
+        % elseif NpNm == 9000
+        %     t = 5
+        %     split_values = round(linspace(0, single(T), single(t)));
+        %     split_values(1) = split_values(1) + 1;
+        % elseif NpNm == 25000
+        %     t = 13
+        %     split_values = round(linspace(0, single(T), single(t)));
+        %     split_values(1) = split_values(1) + 1;
+        % elseif NpNm == 64000
+        %     t = 32
+        %     split_values = round(linspace(0, single(T), single(t)));
+        %     split_values(1) = split_values(1) + 1;
+        % end
+        
+        % % split_values = round(linspace(0, single(T), single(t)));
+        % fprintf('\ninfo: split values: %s', num2str(split_values))
+
+        % u = u(split_values, :, :);
+        % v = v(split_values, :, :);
+
         u = util_keep_upper_triangular(u,na,T);
         v = util_keep_upper_triangular(v,na,T);
+        % step = floor(size(u(:))/(NpNm - 1));
+        % u = u(1:step:end);
+        % v = v(1:step:end);
+        % fprintf('\ninfo: number of visibilities: %d', length(u))
         % w = util_keep_upper_triangular(w,na,T);
         w = zeros('like', u);
     end
