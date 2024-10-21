@@ -19,7 +19,7 @@ function [z] = op_partial_sums(x, Ft, G, param_ROP, noise)
     % z : array
     %       The modulated ROPs
  
-    Q, Np, B = size(param_ROP.alpha); % Number of antennas, projections, batches
+    [Q, Np, B] = size(param_ROP.alpha); % Number of antennas, projections, batches
     Nm = size(param_ROP.Gamma,1); % Number of modulations
 
     % Fourier transform of the image
@@ -29,31 +29,30 @@ function [z] = op_partial_sums(x, Ft, G, param_ROP, noise)
     inds = 1:Q^2*B;
     inds = reshape(inds, [B, Q^2]);
 
-    % open z \in Np x Nm
+    % open z \in Nm x Np
     z = zeros(Nm,Np);
 
     for b = 1:B
 
         % Get Gb 
         inds_b = inds(b,:);
-        Gb = G(inds_b,:); 
+        G_b = G(inds_b,:); 
 
         % computes the Q^2 visibilities
-        vis = Gb* Fx;
-        vis = reshape(vis, [Q, Q]);
-
+        vis_b = G_b * Fx;
         if exist('noise', 'var')
             noise_b = noise(inds_b);
-            vis = vis + noise_b;
+            vis_b = vis_b + noise_b;
         end
+        vis_b = reshape(vis_b, [Q, Q]);
 
         % Compute y_b to get the ROP
-        A = param_ROP.alpha(:,:,b);
-        B = param_ROP.beta(:,:,b);
-        y_b = ROP(A, vis, B); % (p,1)
+        alpha_b = param_ROP.alpha(:,:,b);
+        beta_b = param_ROP.beta(:,:,b);
+        y_b = ROP(alpha_b, vis_b, beta_b); % (Np,1)
 
         % Compute the Nm modulated versions
-        gamma_b = param_ROP.Gamma(:,b); % Nm
+        gamma_b = param_ROP.Gamma(:,b); % (Nm,)
         z_b = gamma_b .* transpose(y_b); % (Nm, Np)
 
         % Inject in z

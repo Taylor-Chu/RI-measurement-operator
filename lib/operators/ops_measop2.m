@@ -1,4 +1,4 @@
-function [measop, adjoint_measop, y] = ops_measop2(x, G, Ft, IFt, param_weighting, tau, param_ROP)
+function [measop, adjoint_measop, y] = ops_measop2(x, G, Ft, IFt, param_weighting, tau, param_ROP, noise)
     % Generate the measurement op and its adjoint from a sampling pattern and
     % user input settings
     % operator (adapted from original code associated with
@@ -22,6 +22,8 @@ function [measop, adjoint_measop, y] = ops_measop2(x, G, Ft, IFt, param_weightin
     %     Noise level
     % param_ROP : struct
     %     Structure containing the parameters for applying ROPs on the measurements
+    % noise : double[:]
+    %     vector containing the noise added to the visibilities
     %
     % Returns
     % -------
@@ -40,7 +42,6 @@ function [measop, adjoint_measop, y] = ops_measop2(x, G, Ft, IFt, param_weightin
     if weighting_on
         % nW = (1 / tau) * ones(na^2*nTimeSamples,1);
         nW = (1 / tau) * nWimag;
-        vis = nW.*vis;
 
         % Integrate the weighting into the interpolation matrix G.
         G = nW .* G;
