@@ -60,4 +60,6 @@ function [z] = op_partial_sums(x, Ft, G, param_ROP, noise)
 
     end
 
+    z = z/sqrt(B); % Normalization
+
 end
